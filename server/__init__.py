@@ -1,12 +1,19 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from .views import account, index, edit, serve
 from flask_cors import CORS
+from flasgger import Swagger
 
 
 def create_app():
 
     app = Flask(__name__, instance_relative_config=True)
     CORS(app)
+    app.config['SWAGGER'] = {
+        "url_prefix": "/personal_file_storage",
+        "title": "Personal File Storage API",
+        "version": "1.0.0",
+    }
+    swagger = Swagger(app)
 
     app.config.from_mapping(SECRET_KEY='dev')
 
@@ -21,9 +28,13 @@ def create_app():
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
     def catch_all(path):
-        if not path.startswith('api/'):
+        main_pages = ['', 'index', 'index/',
+                      'account', 'account/', 'edit', 'edit/']
+        if path in main_pages:
             return render_template("index.html")
         else:
-            return 'Page not found', 404
+            return {'code': 404,
+                    'msg': 'Page Not Found',
+                    'data': None}
 
     return app

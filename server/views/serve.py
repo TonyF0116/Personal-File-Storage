@@ -17,6 +17,7 @@ def serve_js(path):
     return send_from_directory('templates/js', path)
 
 
+# Send requested favicon files
 @blueprint.route('/favicon.ico')
 def serve_favicon():
     return send_file('templates/favicon.ico')
