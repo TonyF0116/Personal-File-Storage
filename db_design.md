@@ -6,6 +6,7 @@ UserName VARCHAR(50),
 NickName VARCHAR(50),
 Password VARCHAR(64),           # stores SHA256 of the password
 Administrator INT,              # 0 is normal user, 1 is administrator
+AvatarSuffix VARCHAR(10),
 PRIMARY KEY (AccountId)
 );
 

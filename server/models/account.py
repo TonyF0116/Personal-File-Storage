@@ -26,3 +26,9 @@ def check_username_num(username):
 def check_password(username, password_hash):
     sql = "SELECT * FROM users WHERE UserName = '{}' AND Password = '{}'"
     return db_execute(sql.format(username, password_hash))
+
+
+# Updare user ninckname and avatar suffix using account_id
+def update_user_info(account_id, nickname, avatar_suffix):
+    sql = "UPDATE users SET NickName = '{}', AvatarSuffix = '{}' WHERE AccountId = {};"
+    db_execute(sql.format(nickname, avatar_suffix, account_id))

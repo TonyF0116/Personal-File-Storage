@@ -1,9 +1,11 @@
 from flask import Blueprint, request, url_for, make_response
-from ..models.account import sign_up, check_username_num, check_password
+from ..models.account import sign_up, check_username_num, check_password, update_user_info
 from ..config import key
 import jwt
 from datetime import datetime, timedelta, timezone
 from ..utils.jwt_validation import jwt_validation
+import os
+import base64
 
 # Handle requests from the account page
 blueprint = Blueprint('account', __name__, url_prefix='/api/account')
@@ -21,7 +23,7 @@ def account():
     # If authorized, do the redirection
     if result['msg'] == 'Authorized':
         return {'msg': 'Authorized',
-                'data': {'url': redirection}}, 302
+                'data': {'url': redirection}}, 200
     # If unauthorized but validation succeeded, grant the permission and do the redirection
     if result['msg'] == 'Unauthorized':
         token_info = result['data']['payload']
@@ -38,7 +40,7 @@ def account():
 
         # Set the Authorization header
         response.headers['Authorization'] = 'Bearer {}'.format(token)
-        return response, 302
+        return response, 200
 
     return {'msg': "Unauthorized",
             'data': {'url': redirection}}, 401
@@ -70,13 +72,13 @@ def signup():
     }
     token = jwt.encode(payload=token_info, key=key, algorithm="HS256")
 
-    # Make response with the redirection info
+    # Make response with the account_id
     response = make_response({'msg': "Sign up successful",
-                              'data': {'url': url_for('route_account')+'?new_user=true'}})
+                              'data': {"account_id": user[0][0]}})
 
     # Set the Authorization header
     response.headers['Authorization'] = 'Bearer {}'.format(token)
-    return response, 302
+    return response, 200
 
 
 @blueprint.route('/login', methods=['POST'])
@@ -121,4 +123,35 @@ def login():
 
     # Set the Authorization header
     response.headers['Authorization'] = 'Bearer {}'.format(token)
-    return response, 302
+    return response, 200
+
+
+# Update user nickname and avatar suffix
+@blueprint.route('/new_user_info', methods=['POST'])
+def new_user_info():
+    # Retrieve data from the form
+    avatar_data = request.form.get('avatar')
+    avatar_name = request.form.get('avatar_name')
+    nickname = request.form.get('nickname')
+    account_id = request.form.get('account_id')
+
+    # Split the avatar suffix
+    avatar_suffix = avatar_name.split('.')[-1]
+    avatar_name = 'avatar.{}'.format(avatar_suffix)
+
+    # Update info in the database
+    update_user_info(account_id, nickname, avatar_suffix)
+
+    # Save the avatar in the user's files folder
+    avatar = base64.b64decode(avatar_data)
+
+    if not os.path.exists('server/files/'):
+        os.mkdir('server/files/')
+
+    if not os.path.exists('server/files/{}/'.format(account_id)):
+        os.mkdir('server/files/{}/'.format(account_id))
+
+    with open(os.path.join('server/files/{}/{}'.format(account_id, avatar_name)), 'wb') as f:
+        f.write(avatar)
+    return {'msg': 'Success',
+            'data': None}

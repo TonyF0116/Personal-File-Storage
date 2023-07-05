@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 from .views import account, index, edit, serve
 from flask_cors import CORS
 from flasgger import Swagger
+from .utils.jwt_validation import jwt_validation
 
 
 def create_app():

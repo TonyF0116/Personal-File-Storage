@@ -6,18 +6,18 @@ import EditPage from '../components/EditPage.vue';
 const routes = [
     {
         path: '/',
-        redirect: '/Index'
+        redirect: '/index'
     },
     {
-        path: '/Account',
+        path: '/account',
         component: AccountPage
     },
     {
-        path: '/Index',
+        path: '/index',
         component: IndexPage
     },
     {
-        path: '/Edit',
+        path: '/edit',
         component: EditPage
     }
 ];

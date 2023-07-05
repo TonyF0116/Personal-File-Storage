@@ -8,7 +8,7 @@ export default {
     methods: {
         // Example for redirection using router
         goToEditPage() {
-            this.$router.push('/Edit');
+            this.$router.push('/edit');
         }
     }
 }
