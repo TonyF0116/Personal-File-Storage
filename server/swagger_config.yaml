@@ -9,11 +9,12 @@ servers:
 
 components:
   securitySchemes:
-    cookieAuth:
+    jwtTokenAuth:
       type: http
       scheme: bearer
+      bearerFormat: JWT 
 security:
-  - cookieAuth: []
+  - jwtTokenAuth: []
 
 
 paths:

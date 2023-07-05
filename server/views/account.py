@@ -3,6 +3,7 @@ from ..models.account import sign_up, check_username_num, check_password
 from ..config import key
 import jwt
 from datetime import datetime, timedelta, timezone
+from ..utils.jwt_validation import jwt_validation
 
 # Handle requests from the account page
 blueprint = Blueprint('account', __name__, url_prefix='/api/account')
@@ -10,23 +11,37 @@ blueprint = Blueprint('account', __name__, url_prefix='/api/account')
 
 @blueprint.route('/')
 def account():
-    # Check current token in cookie
-    print(request.headers)
-    token = request.cookies
+    # Retrieve the token and redirection from request header and url
+    token = request.headers.get('Authorization')[7:]
+    redirection = request.args.get('redirection')
 
-    # If token exist, decode the token
-    if token != None:
-        try:
-            jwt.decode(jwt=token, key=key, algorithms=["HS256"])
-        # If successfully decoded, redirect back with the token added as a arg
-        except jwt.ExpiredSignatureError:
-            pass
-        except jwt.DecodeError:
-            pass
-        else:
-            return 'a'
-            # return make_response(request.args.get('redirect')+'?token={}'.format(token))
-    return 'b'
+    # Validate the token and authorization
+    result = jwt_validation(token, redirection)
+
+    # If authorized, do the redirection
+    if result['msg'] == 'Authorized':
+        return {'msg': 'Authorized',
+                'data': {'url': redirection}}, 302
+    # If unauthorized but validation succeeded, grant the permission and do the redirection
+    if result['msg'] == 'Unauthorized':
+        token_info = result['data']['payload']
+        if 'index' in redirection:
+            token_info['index_page_authorization'] = True
+        if 'edit' in redirection:
+            token_info['edit_page_authorization'] = True
+
+        token = jwt.encode(payload=token_info, key=key, algorithm="HS256")
+
+        # Make response with the redirection info
+        response = make_response({'msg': "Authorized",
+                                  'data': {'url': redirection}})
+
+        # Set the Authorization header
+        response.headers['Authorization'] = 'Bearer {}'.format(token)
+        return response, 302
+
+    return {'msg': "Unauthorized",
+            'data': {'url': redirection}}, 401
 
 
 @blueprint.route('/signup', methods=['POST'])
@@ -38,7 +53,8 @@ def signup():
     # If the number of users with the given username is not 0,
     # then this is a duplicated username, return the error msg
     if check_username_num(username) != 0:
-        return "Username already existed."
+        return {'msg': "Username already existed.",
+                'data': None}, 400
 
     # Sign up using the given username and password
     user = sign_up(username, password_hash)
@@ -55,11 +71,11 @@ def signup():
     token = jwt.encode(payload=token_info, key=key, algorithm="HS256")
 
     # Make response with the redirection info
-    response = make_response({'msg': None,
-                              'data': {'url': url_for('catch_all')+'?token={}&new_user=true'.format(token)}})
+    response = make_response({'msg': "Sign up successful",
+                              'data': {'url': url_for('route_account')+'?new_user=true'}})
 
-    # Set cookie for account page
-    response.set_cookie(key='token', value=token, path='/account')
+    # Set the Authorization header
+    response.headers['Authorization'] = 'Bearer {}'.format(token)
     return response, 302
 
 
@@ -69,8 +85,6 @@ def login():
     username = request.form.get('username')
     password_hash = request.form.get('password_hash')
     redirection = request.form.get('redirection')
-
-    print(request.headers)
 
     # If the number of users with the given username is not 1,
     # then there is an no such user in the database, return the error msg
@@ -99,12 +113,12 @@ def login():
 
     # Redirect to index page if redirection not provided
     if redirection == None:
-        redirection = url_for('catch_all')
+        redirection = url_for('route_index')
 
     # Make response with the redirection info
     response = make_response({'msg': None,
-                              'data': {'url': redirection+'?token={}'.format(token)}})
+                              'data': {'url': redirection}})
 
-    # Set cookie for account page
-    response.set_cookie(key='token', value=token, path='/account')
+    # Set the Authorization header
+    response.headers['Authorization'] = 'Bearer {}'.format(token)
     return response, 302

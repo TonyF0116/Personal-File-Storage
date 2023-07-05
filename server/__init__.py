@@ -17,18 +17,32 @@ def create_app():
     app.register_blueprint(index.blueprint)
     app.register_blueprint(edit.blueprint)
 
-    # Catch all requests that doesn't start with /api
-    # If route not found, then return 404
+    # # Catch all requests that doesn't start with /api
+    # # If route not found, then return 404
 
-    @app.route('/', defaults={'path': ''})
-    @app.route('/<path:path>')
-    def catch_all(path):
-        main_pages = ['', 'index', 'index/',
-                      'account', 'account/', 'edit', 'edit/']
-        if path in main_pages:
-            return render_template("index.html")
-        else:
-            return {'msg': 'Page Not Found',
-                    'data': None}, 404
+    # @app.route('/', defaults={'path': ''})
+    # @app.route('/<path:path>')
+    # def catch_all(path):
+    #     main_pages = ['', 'index', 'index/',
+    #                   'account', 'account/', 'edit', 'edit/']
+    #     if path in main_pages:
+    #         return render_template("index.html")
+    #     else:
+    #         return {'msg': 'Page Not Found',
+    #                 'data': None}, 404
+
+    # Routes for the main pages
+
+    @app.route('/index')
+    def route_index():
+        return render_template("index.html")
+
+    @app.route('/account')
+    def route_account():
+        return render_template("index.html")
+
+    @app.route('/edit')
+    def route_edit():
+        return render_template("index.html")
 
     return app
