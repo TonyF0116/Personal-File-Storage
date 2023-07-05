@@ -1,19 +1,14 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, request
 from .views import account, index, edit, serve
 from flask_cors import CORS
 from flasgger import Swagger
 
 
 def create_app():
-
     app = Flask(__name__, instance_relative_config=True)
     CORS(app)
-    app.config['SWAGGER'] = {
-        "url_prefix": "/personal_file_storage",
-        "title": "Personal File Storage API",
-        "version": "1.0.0",
-    }
-    swagger = Swagger(app)
+    app.config['SWAGGER'] = {'openapi': '3.0.0'}
+    swagger = Swagger(app, template_file='swagger_config.yaml')
 
     app.config.from_mapping(SECRET_KEY='dev')
 
@@ -22,8 +17,8 @@ def create_app():
     app.register_blueprint(index.blueprint)
     app.register_blueprint(edit.blueprint)
 
-   # Catch all requests that doesn't start with /api
-   # If route not found, then return 404
+    # Catch all requests that doesn't start with /api
+    # If route not found, then return 404
 
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
@@ -33,8 +28,7 @@ def create_app():
         if path in main_pages:
             return render_template("index.html")
         else:
-            return {'code': 404,
-                    'msg': 'Page Not Found',
-                    'data': None}
+            return {'msg': 'Page Not Found',
+                    'data': None}, 404
 
     return app

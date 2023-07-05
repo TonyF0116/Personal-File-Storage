@@ -1,0 +1,91 @@
+openapi: 3.0.0
+info:
+  title: Personal File Storage API
+  description: API Documentation for person file storage system
+  version: 1.0.0
+servers:
+  - url: ''
+    description: localhost
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: http
+      scheme: bearer
+security:
+  - cookieAuth: []
+
+
+paths:
+  /api/account/signup:
+    post:
+      summary: Handles signup requests
+      tags:
+        - Account
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: User entered username.
+                password_hash:
+                  type: string
+                  description: SHA256 hash for the user entered password.
+      responses:
+        '302':
+          description: Sign up successful. Redirect to data.url with new_user arg set as true.
+        '400':
+          description: Duplicate username. Display msg.
+
+
+#     """
+#     Handles account page JWT validation
+#     ---
+#     tags:
+#       - Account
+#     security:
+#       - cookieAuth: []
+#     parameters:
+#       - name: token222
+#         in: cookie
+#         type: string
+#         description: JWT token stored in cookies.
+#     responses:
+#       302:
+#         description: Sign up successful. Redirect to data.url with new_user arg set as true.
+#       400:
+#         description: Duplicate username. Display msg.
+#     """
+
+
+# """
+#     Handles login requests
+#     ---
+#     tags:
+#       - Account
+#     parameters:
+#       - name: username
+#         in: formData
+#         type: string
+#         required: true
+#         description: User entered username.
+#       - name: password_hash
+#         in: formData
+#         type: string
+#         required: true
+#         description: SHA256 hash for the user entered password.
+#       - name: redirection
+#         in: formData
+#         type: string
+#         required: false
+#         description: URL to redirect to after logging in.
+#     responses:
+#       302:
+#         description: Login successful. Redirect to data.url.
+#       401:
+#           description: Incorrect credentials. Display msg.
+#     """

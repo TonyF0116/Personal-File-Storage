@@ -4,7 +4,7 @@ A personal file storage system, in which you can store and view pictures and oth
 
 The website implements SSO (Single Sign On) using JWT. Token stored in cookies has path attribute set for respective pages (account page, index page, and edit page) to simulate the SSO process on different websites.
 
-flasgger is used for api demonstration. Visit http://127.0.0.1:5000/personal_file_storage/apidocs/ when the app is running for more info.
+flasgger is used for api demonstration. Visit http://127.0.0.1:5000/apidocs/ when the app is running for more info.
 
 Run with the following steps:
 
