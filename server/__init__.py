@@ -34,6 +34,10 @@ def create_app():
 
     # Routes for the main pages
 
+    @app.route('/')
+    def route_empty():
+        return render_template("index.html")
+
     @app.route('/index')
     def route_index():
         return render_template("index.html")

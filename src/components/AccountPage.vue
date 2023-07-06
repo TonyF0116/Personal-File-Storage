@@ -20,6 +20,8 @@
         <button class="login_button" @click="toggle_popup_login">Login</button>
         <button class="signup_button" @click="toggle_popup_signup">Sign up</button>
 
+        <h2 style="color: red;">{{ account_warning_msg }}</h2>
+
         <transition name="fade">
             <div v-if="is_popup_visible" class="popup" @click.self="closePopup">
                 <div class="popup_content">
@@ -44,7 +46,8 @@
 <script>
 import SHA256 from 'crypto-js/sha256';
 import axios from 'axios';
-axios.defaults.baseURL = 'http://127.0.0.1:5000/api/account';
+axios.defaults.baseURL = 'http://127.0.0.1:5000';
+
 
 
 export default {
@@ -63,10 +66,37 @@ export default {
             nickname: "",
             submit_message: "",
             avatar_data: null,
-            avatar_name: ""
+            avatar_name: "",
+            account_warning_msg: "",
+            authorization_token: ""
         }
     },
+    mounted() {
+        // Authorization token in url args => valid token but need to grant authorization
+        if (this.$route.query.Authorization != "") {
+            axios.defaults.headers.common['Authorization'] = this.$route.query.Authorization
+            this.initialize_account_page()
+        }
+        this.account_warning_msg = this.$route.query.warning
+    },
     methods: {
+        // Send request to /api/account to get a token with needed authorization
+        initialize_account_page() {
+            axios.post('/api/account' + '?redirection=' + this.$route.query.redirection)
+                .then(response => {
+                    console.log(response)
+                    if (response.data.msg == 'Authorized') {
+                        this.$router.push({
+                            path: this.$route.query.redirection, query: {
+                                Authorization: response.headers.authorization
+                            }
+                        });
+                    }
+
+                }, error => {
+                    console.log(error);
+                });
+        },
         // Submit user nickname and avatar
         submit() {
             // Check empty nickname or avatar
@@ -89,10 +119,14 @@ export default {
             this.submit_message = "Submitting";
 
             // Redirect after successful upload
-            axios.post('/new_user_info', form)
+            axios.post('/api/account/new_user_info', form)
                 .then(response => {
                     this.submit_message = response.data.msg;
-                    this.$router.push('/index');
+                    this.$router.push({
+                        path: '/index', query: {
+                            Authorization: this.authorization_token
+                        }
+                    });
                 }, error => {
                     console.log(error);
                 });
@@ -166,14 +200,19 @@ export default {
             // Check if input is empty
             if (this.check_empty() != "") {
                 this.warning = this.check_empty()
+                return
             }
             // Send login request with the input username and password hash
             const formData = new FormData();
             formData.append('username', this.username);
             formData.append('password_hash', SHA256(this.password).toString());
-            axios.post('/login', formData)
+            axios.post('/api/account/login', formData)
                 .then(response => {
-                    this.$router.push(response.data.data.redirection);
+                    console.log(response)
+                    this.$router.push({
+                        path: response.data.data.redirection,
+                        query: { Authorization: response.headers.authorization }
+                    });
                 }, error => {
                     this.warning = error.response.data.msg;
                     console.log(error);
@@ -183,16 +222,18 @@ export default {
             // Check if input is empty
             if (this.check_empty() != "") {
                 this.warning = this.check_empty()
+                return
             }
             // Send signup request with the input username and password hash
             const formData = new FormData();
             formData.append('username', this.username);
             formData.append('password_hash', SHA256(this.password).toString());
-            axios.post('/signup', formData)
+            axios.post('/api/account/signup', formData)
                 .then(response => {
                     console.log(response)
                     this.new_user = true
                     this.account_id = response.data.data.account_id
+                    this.authorization_token = response.headers.authorization
                 }, error => {
                     this.warning = error.response.data.msg;
                     console.log(error);
@@ -359,5 +400,4 @@ input {
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
-}
-</style>
+}</style>
