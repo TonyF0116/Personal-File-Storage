@@ -11,11 +11,17 @@ import base64
 blueprint = Blueprint('account', __name__, url_prefix='/api/account')
 
 
-@blueprint.route('/')
+# Handles account page redirecting JWT authorization validation
+@blueprint.route('', methods=['POST'])
 def account():
     # Retrieve the token and redirection from request header and url
-    token = request.headers.get('Authorization')[7:]
+    # Return unauthorized if Authorization not in header
+    authorization = request.headers.get('Authorization')
     redirection = request.args.get('redirection')
+    if authorization == None:
+        return {'msg': "Unauthorized",
+                'data': {'redirection': redirection}}, 401
+    token = authorization[7:]
 
     # Validate the token and authorization
     result = jwt_validation(token, redirection)
@@ -23,7 +29,7 @@ def account():
     # If authorized, do the redirection
     if result['msg'] == 'Authorized':
         return {'msg': 'Authorized',
-                'data': {'url': redirection}}, 200
+                'data': {'redirection': redirection}}, 200
     # If unauthorized but validation succeeded, grant the permission and do the redirection
     if result['msg'] == 'Unauthorized':
         token_info = result['data']['payload']
@@ -36,14 +42,14 @@ def account():
 
         # Make response with the redirection info
         response = make_response({'msg': "Authorized",
-                                  'data': {'url': redirection}})
+                                  'data': {'redirection': redirection}})
 
         # Set the Authorization header
         response.headers['Authorization'] = 'Bearer {}'.format(token)
         return response, 200
 
     return {'msg': "Unauthorized",
-            'data': {'url': redirection}}, 401
+            'data': {'redirection': redirection}}, 401
 
 
 @blueprint.route('/signup', methods=['POST'])
@@ -83,10 +89,10 @@ def signup():
 
 @blueprint.route('/login', methods=['POST'])
 def login():
-    # Parse the input username, password_hash, and redirection from the request form
+    # Parse the input username, password_hash, and redirection from the request form and url
     username = request.form.get('username')
     password_hash = request.form.get('password_hash')
-    redirection = request.form.get('redirection')
+    redirection = request.args.get('redirection')
 
     # If the number of users with the given username is not 1,
     # then there is an no such user in the database, return the error msg
@@ -118,8 +124,8 @@ def login():
         redirection = url_for('route_index')
 
     # Make response with the redirection info
-    response = make_response({'msg': None,
-                              'data': {'url': redirection}})
+    response = make_response({'msg': "Login successful",
+                              'data': {'redirection': redirection}})
 
     # Set the Authorization header
     response.headers['Authorization'] = 'Bearer {}'.format(token)
@@ -139,19 +145,27 @@ def new_user_info():
     avatar_suffix = avatar_name.split('.')[-1]
     avatar_name = 'avatar.{}'.format(avatar_suffix)
 
-    # Update info in the database
-    update_user_info(account_id, nickname, avatar_suffix)
+    try:
 
-    # Save the avatar in the user's files folder
-    avatar = base64.b64decode(avatar_data)
+        # Save the avatar in the user's files folder
+        avatar = base64.b64decode(avatar_data)
 
-    if not os.path.exists('server/files/'):
-        os.mkdir('server/files/')
+        if not os.path.exists('server/files/'):
+            os.mkdir('server/files/')
 
-    if not os.path.exists('server/files/{}/'.format(account_id)):
-        os.mkdir('server/files/{}/'.format(account_id))
+        if not os.path.exists('server/files/{}/'.format(account_id)):
+            os.mkdir('server/files/{}/'.format(account_id))
 
-    with open(os.path.join('server/files/{}/{}'.format(account_id, avatar_name)), 'wb') as f:
-        f.write(avatar)
-    return {'msg': 'Success',
-            'data': None}
+        with open(os.path.join('server/files/{}/{}'.format(account_id, avatar_name)), 'wb') as f:
+            f.write(avatar)
+
+        # Update info in the database
+        update_user_info(account_id, nickname, avatar_suffix)
+
+        return {'msg': 'Success',
+                'data': None}, 200
+
+    except Exception as error:
+        print(error)
+        return {'msg': 'Unknown error. Check server terminal for more info.',
+                'data': None}, 500

@@ -173,7 +173,7 @@ export default {
             formData.append('password_hash', SHA256(this.password).toString());
             axios.post('/login', formData)
                 .then(response => {
-                    this.$router.push(response.data.data.url);
+                    this.$router.push(response.data.data.redirection);
                 }, error => {
                     this.warning = error.response.data.msg;
                     console.log(error);

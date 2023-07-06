@@ -4,7 +4,7 @@ info:
   description: API Documentation for person file storage system
   version: 1.0.0
 servers:
-  - url: ''
+  - url: 'http://127.0.0.1:5000'
     description: localhost
 
 components:
@@ -13,22 +13,72 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT 
-security:
-  - jwtTokenAuth: []
+
 
 
 paths:
+  /api/account:
+    post:
+      security:
+        - jwtTokenAuth: []
+      summary: Handles account page redirecting JWT authorization validation
+      tags:
+        - Account
+      parameters:
+        - name: redirection
+          in: query
+          required: true
+          description: URL to redirect to after logging in.
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: Validation success. Authorized.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Authorized
+                  data:
+                    type: object
+                    properties:
+                      redirection:
+                        type: string
+                        example: localhost
+        '401':
+          description: Validation failed.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Unauthorized
+                  data:
+                    type: object
+                    properties:
+                      redirection:
+                        type: string
+                        example: localhost
+
+
+  
   /api/account/signup:
     post:
       summary: Handles signup requests
       tags:
         - Account
       requestBody:
-        required: true
         content:
           multipart/form-data:
             schema:
               type: object
+              required: [username, password_hash]
               properties:
                 username:
                   type: string
@@ -37,56 +87,141 @@ paths:
                   type: string
                   description: SHA256 hash for the user entered password.
       responses:
-        '302':
-          description: Sign up successful. Redirect to data.url with new_user arg set as true.
+        '200':
+          description: Sign up successful. Client redirect to upload user info page.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Sign up successful
+                  data:
+                    type: object
+                    properties:
+                      account_id:
+                        type: integer
+                        example: 0
         '400':
           description: Duplicate username. Display msg.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Username already existed.
+                  data:
+                    type: object
+                    example: null
+          
+  /api/account/login:
+    post:
+      summary: Handles login requests
+      tags:
+        - Account
+      parameters:
+        - name: redirection
+          in: query
+          description: URL to redirect to after logging in.
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [username, password_hash]
+              properties:
+                username:
+                  type: string
+                  description: User entered username.
+                password_hash:
+                  type: string
+                  description: SHA256 hash for the user entered password.
+      responses:
+        '200':
+          description: Login successful. Redirect to data.redirection.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Login successful
+                  data:
+                    type: object
+                    properties:
+                      redirection:
+                        type: string
+                        example: localhost
+        '401':
+          description: Incorrect credentials. Display msg.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Username doesn't exist. / Incorrect password.
+                  data:
+                    type: object
+                    example: null
+                    
+  /api/account/new_user_info:
+    post:
+      summary: Update user nickname and avatar suffix
+      tags:
+        - Account
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [avatar, avatar_name, nickname, account_id]
+              properties:
+                avatar:
+                  type: string
+                  description: Image data in base64.
+                avatar_name:
+                  type: string
+                  description: Avatar file name.
+                nickname:
+                  type: string
+                  description: User entered nickname.
+                account_id:
+                  type: integer
+                  description: User account id.
 
-
-#     """
-#     Handles account page JWT validation
-#     ---
-#     tags:
-#       - Account
-#     security:
-#       - cookieAuth: []
-#     parameters:
-#       - name: token222
-#         in: cookie
-#         type: string
-#         description: JWT token stored in cookies.
-#     responses:
-#       302:
-#         description: Sign up successful. Redirect to data.url with new_user arg set as true.
-#       400:
-#         description: Duplicate username. Display msg.
-#     """
-
-
-# """
-#     Handles login requests
-#     ---
-#     tags:
-#       - Account
-#     parameters:
-#       - name: username
-#         in: formData
-#         type: string
-#         required: true
-#         description: User entered username.
-#       - name: password_hash
-#         in: formData
-#         type: string
-#         required: true
-#         description: SHA256 hash for the user entered password.
-#       - name: redirection
-#         in: formData
-#         type: string
-#         required: false
-#         description: URL to redirect to after logging in.
-#     responses:
-#       302:
-#         description: Login successful. Redirect to data.url.
-#       401:
-#           description: Incorrect credentials. Display msg.
-#     """
+      responses:
+        '200':
+          description: Upload successful.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Success
+                  data:
+                    type: object
+                    example: null
+        '500':
+          description: Upload failed.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Unknown error. Check server terminal for more info.
+                  data:
+                    type: object
+                    example: null                   
+                    
