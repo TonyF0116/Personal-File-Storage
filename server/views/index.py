@@ -23,7 +23,7 @@ def index():
 
     # Validation failed => Invalid token => Login again
     if result['msg'] == 'Validation failed':
-        return {'msg': "Unauthorized",
+        return {'msg': 'Validation failed',
                 'data': {'redirection': '{}?redirection={}&warning=Login+Expired'
                          .format(url_for('route_account'), url_for('route_index'))}}, 401
 

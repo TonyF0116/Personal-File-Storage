@@ -35,6 +35,12 @@ paths:
       responses:
         '200':
           description: Validation success. Authorized.
+          headers:
+            Authorization:
+              description: Present when new permission granted. Access with lowercased.
+              schema:
+                type: string
+                example: Bearer {JWT}
           content:
             application/json:
               schema: 
@@ -66,8 +72,6 @@ paths:
                         type: string
                         example: localhost
 
-
-  
   /api/account/signup:
     post:
       summary: Handles signup requests
@@ -89,6 +93,12 @@ paths:
       responses:
         '200':
           description: Sign up successful. Client redirect to upload user info page.
+          headers:
+            Authorization:
+              description: User JWT Authorization. Access with lowercased.
+              schema:
+                type: string
+                example: Bearer {JWT}
           content:
             application/json:
               schema: 
@@ -144,6 +154,12 @@ paths:
       responses:
         '200':
           description: Login successful. Redirect to data.redirection.
+          headers:
+            Authorization:
+              description: User JWT Authorization. Access with lowercased.
+              schema:
+                type: string
+                example: Bearer {JWT}
           content:
             application/json:
               schema: 
@@ -223,5 +239,156 @@ paths:
                     example: Unknown error. Check server terminal for more info.
                   data:
                     type: object
-                    example: null                   
-                    
+                    example: null      
+  
+  /api/index:
+    post:
+      summary: Validating authorization and get basic user information
+      tags:
+        - Index
+      security:
+        - jwtTokenAuth: []
+      responses:
+        '200':
+          description: Validation successful.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      user_info:
+                        type: object
+                        properties: 
+                          AccountId:
+                            type: integer
+                            example: 1
+                          UserName:
+                            type: string
+                            example: admin
+                          NickName:
+                            type: string
+                            example: admin
+                          Password:
+                            type: string
+                            example: password_hash
+                          Administrator:
+                            type: integer
+                            example: 0 / 1
+                          AvatarSuffix:
+                            type: string
+                            example: jpg / jpeg / png
+                      user_files:
+                        type: object
+                        properties: 
+                          FileId:
+                            type: integer
+                            example: 1
+                          AccountId:
+                            type: integer
+                            example: 1
+                          FileName:
+                            type: string
+                            example: example.pdf
+                          FileType:
+                            type: integer
+                            example: integer - 0 is pic, 1 is pdf, 2 is excel
+                          LastModified:
+                            type: string
+                            example: 2023-01-01 00:00:00
+        '302':
+          description: Validation succeeded but not authorized.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Unauthorized
+                  data:
+                    type: object
+                    properties:
+                      redirection:
+                        type: string
+                        example: localhost                  
+        '401':
+          description: Validation failed.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Validation failed
+                  data:
+                    type: object
+                    properties:
+                      redirection:
+                        type: string
+                        example: localhost
+  /api/edit:
+    post:
+      summary: Validating authorization
+      tags:
+        - Edit
+      security:
+        - jwtTokenAuth: []
+      responses:
+        '200':
+          description: Validation successful.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      account_id:
+                        type: integer
+                        example: 1  
+        '302':
+          description: Validation succeeded but not authorized.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Unauthorized
+                  data:
+                    type: object
+                    properties:
+                      redirection:
+                        type: string
+                        example: localhost                  
+        '401':
+          description: Validation failed.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Validation failed
+                  data:
+                    type: object
+                    properties:
+                      redirection:
+                        type: string
+                        example: localhost
+
+
+
