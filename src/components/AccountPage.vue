@@ -1,5 +1,5 @@
 <template>
-    <div v-if="authorization_token == null">
+    <div v-if="authorization_token == null || new_user">
 
         <div class="page_title">{{ page_title }}</div>
 
@@ -14,7 +14,7 @@
             <input type="file" id="avatar_input" @change="choose_avatar_clicked" accept=".jpg, .jpeg, .png">
             <label for="avatar_input" class="choose_avatar_button">Choose Avatar</label>
             <img class="preview_avatar" v-if="avatar" :src="avatar" alt="Image" />
-            <h4>{{ file_upload_message }}</h4>
+            <h4 style="margin-top: -400px;">{{ file_upload_message }}</h4>
             <button class="submit_button" @click="submit">Finished!</button>
             <h3 style="margin-top: 40%;">{{ submit_message }}</h3>
         </div>

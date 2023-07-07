@@ -11,6 +11,8 @@ axios.defaults.baseURL = 'http://127.0.0.1:5000';
 export default {
     data() {
         return {
+            account_id: 0,
+
         }
     },
     mounted() {
@@ -23,7 +25,7 @@ export default {
             axios.post('/api/index', {}
             ).then(response => {
                 console.log(response)
-                // this.userid = response.data.userid;
+                // this.account_id = response.data.account_id;
                 // this.username = response.data['username'];
                 // this.nickname = response.data['nickname'];
                 // this.files = response.data['files'];

@@ -3,7 +3,7 @@ from ..db import db_execute
 
 # Get user info with the input account_id
 def get_user_info(account_id):
-    sql = "SELECT * FROM users WHERE AccountId = {}"
+    sql = "SELECT AccountId, UserName, NickName, Administrator, AvatarSuffix FROM users WHERE AccountId = {}"
     return db_execute(sql.format(account_id))
 
 

@@ -37,7 +37,6 @@ def index():
     account_id = result['data']['payload']['account_id']
     user_info = get_user_info(account_id)
     user_files = get_user_files(account_id)
-    # print(user_info)
-    # print(user_files)
     return {'msg': None,
-            'data': {'account_id': account_id}}, 200
+            'data': {'user_info': user_info,
+                     'user_files': user_files}}, 200
