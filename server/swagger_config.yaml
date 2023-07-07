@@ -324,6 +324,53 @@ paths:
                       redirection:
                         type: string
                         example: localhost
+                        
+  /api/index/upload_file:
+    post:
+      summary: Upload file
+      tags:
+        - Index
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [username, password_hash]
+              properties:
+                account_id:
+                  type: integer
+                  description: User account id.
+                file:
+                  type: file
+                  description: File to upload. Transmitted in request.files['file'].
+      responses:
+        '200':
+          description: Upload successful.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: File uploaded successfully.
+                  data:
+                    type: object
+                    example: null
+        '500':
+          description: Error occurred when saving file.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Save file failed. Check server terminal for more info.
+                  data:
+                    type: object
+                    example: null
+                        
   /api/edit:
     post:
       summary: Validating authorization
@@ -349,7 +396,7 @@ paths:
                         type: integer
                         example: 1  
         '302':
-          description: Validation succeeded but not authorized.
+          description: Validation succeeded but not authorized. / No file_id provided
           content:
             application/json:
               schema: 
@@ -357,7 +404,7 @@ paths:
                 properties:
                   msg:
                     type: string
-                    example: Unauthorized
+                    example: Unauthorized / No file chosen
                   data:
                     type: object
                     properties:
