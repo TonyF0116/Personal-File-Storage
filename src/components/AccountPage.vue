@@ -1,45 +1,49 @@
 <template>
-    <div class="page_title">{{ page_title }}</div>
+    <div v-if="authorization_token == null">
 
-    <div v-if="new_user">
-        <h2>Customize your avatar and nickname!</h2>
+        <div class="page_title">{{ page_title }}</div>
 
-        <div class="nickname">
-            <label for="nickname">Nickname </label>
-            <input type="text" v-model="nickname" id="nickname" />
-        </div>
+        <div v-if="new_user">
+            <h2>Customize your avatar and nickname!</h2>
 
-        <input type="file" id="avatar_input" @change="choose_avatar_clicked" accept=".jpg, .jpeg, .png">
-        <label for="avatar_input" class="choose_avatar_button">Choose Avatar</label>
-        <img class="preview_avatar" v-if="avatar" :src="avatar" alt="Image" />
-        <h4>{{ file_upload_message }}</h4>
-        <button class="submit_button" @click="submit">Finished!</button>
-        <h3 style="margin-top: 40%;">{{ submit_message }}</h3>
-    </div>
-    <div v-else>
-        <button class="login_button" @click="toggle_popup_login">Login</button>
-        <button class="signup_button" @click="toggle_popup_signup">Sign up</button>
-
-        <h2 style="color: red;">{{ account_warning_msg }}</h2>
-
-        <transition name="fade">
-            <div v-if="is_popup_visible" class="popup" @click.self="closePopup">
-                <div class="popup_content">
-                    <div class="form_group">
-                        <label for="username">Username </label>
-                        <input type="text" name="username" id="username" v-model="username" @keyup.enter="enter_handler" />
-                    </div>
-                    <div class="form_group">
-                        <label for="password">Password </label>
-                        <input type="password" name="password" id="password" v-model="password"
-                            @keyup.enter="enter_handler" />
-                    </div>
-                    <div style="font-size: medium; color: red;">{{ warning }}</div>
-                    <div v-if="login_pressed"><button class="popup_button" @click="login">Login</button></div>
-                    <div v-else><button class="popup_button" @click="signup">Sign up</button></div>
-                </div>
+            <div class="nickname">
+                <label for="nickname">Nickname </label>
+                <input type="text" v-model="nickname" id="nickname" />
             </div>
-        </transition>
+
+            <input type="file" id="avatar_input" @change="choose_avatar_clicked" accept=".jpg, .jpeg, .png">
+            <label for="avatar_input" class="choose_avatar_button">Choose Avatar</label>
+            <img class="preview_avatar" v-if="avatar" :src="avatar" alt="Image" />
+            <h4>{{ file_upload_message }}</h4>
+            <button class="submit_button" @click="submit">Finished!</button>
+            <h3 style="margin-top: 40%;">{{ submit_message }}</h3>
+        </div>
+        <div v-else>
+            <button class="login_button" @click="toggle_popup_login">Login</button>
+            <button class="signup_button" @click="toggle_popup_signup">Sign up</button>
+
+            <h2 style="color: red;">{{ account_warning_msg }}</h2>
+
+            <transition name="fade">
+                <div v-if="is_popup_visible" class="popup" @click.self="closePopup">
+                    <div class="popup_content">
+                        <div class="form_group">
+                            <label for="username">Username </label>
+                            <input type="text" name="username" id="username" v-model="username"
+                                @keyup.enter="enter_handler" />
+                        </div>
+                        <div class="form_group">
+                            <label for="password">Password </label>
+                            <input type="password" name="password" id="password" v-model="password"
+                                @keyup.enter="enter_handler" />
+                        </div>
+                        <div style="font-size: medium; color: red;">{{ warning }}</div>
+                        <div v-if="login_pressed"><button class="popup_button" @click="login">Login</button></div>
+                        <div v-else><button class="popup_button" @click="signup">Sign up</button></div>
+                    </div>
+                </div>
+            </transition>
+        </div>
     </div>
 </template>
 
@@ -74,6 +78,7 @@ export default {
     mounted() {
         // Authorization token in url args => valid token but need to grant authorization
         if (this.$route.query.Authorization != "") {
+            this.authorization_token = this.$route.query.Authorization
             axios.defaults.headers.common['Authorization'] = this.$route.query.Authorization
             this.initialize_account_page()
         }
@@ -400,4 +405,5 @@ input {
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
-}</style>
+}
+</style>

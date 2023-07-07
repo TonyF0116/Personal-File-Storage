@@ -73,7 +73,7 @@ def signup():
         "exp": datetime.now(tz=timezone.utc) + timedelta(hours=1),
         "nbf": datetime.now(tz=timezone.utc),
         "account_page_authorization": True,
-        "index_page_authorization": False,
+        "index_page_authorization": True,
         "edit_page_authorization": False
     }
     token = jwt.encode(payload=token_info, key=key, algorithm="HS256")
@@ -117,11 +117,15 @@ def login():
         "index_page_authorization": False,
         "edit_page_authorization": False
     }
-    token = jwt.encode(payload=token_info, key=key, algorithm="HS256")
-
     # Redirect to index page if redirection not provided
     if redirection == None:
         redirection = url_for('route_index')
+    if 'index' in redirection:
+        token_info['index_page_authorization'] = True
+    if 'edit' in redirection:
+        token_info['edit_page_authorization'] = True
+
+    token = jwt.encode(payload=token_info, key=key, algorithm="HS256")
 
     # Make response with the redirection info
     response = make_response({'msg': "Login successful",
