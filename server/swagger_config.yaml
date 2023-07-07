@@ -35,12 +35,6 @@ paths:
       responses:
         '200':
           description: Validation success. Authorized.
-          headers:
-            Authorization:
-              description: Present when new permission granted. Access with lowercased.
-              schema:
-                type: string
-                example: Bearer {JWT}
           content:
             application/json:
               schema: 
@@ -55,6 +49,9 @@ paths:
                       redirection:
                         type: string
                         example: localhost
+                      token:
+                        type: string
+                        example: Bearer {JWT}
         '401':
           description: Validation failed.
           content:
@@ -93,12 +90,6 @@ paths:
       responses:
         '200':
           description: Sign up successful. Client redirect to upload user info page.
-          headers:
-            Authorization:
-              description: User JWT Authorization. Access with lowercased.
-              schema:
-                type: string
-                example: Bearer {JWT}
           content:
             application/json:
               schema: 
@@ -113,6 +104,9 @@ paths:
                       account_id:
                         type: integer
                         example: 0
+                      token:
+                        type: string
+                        example: Bearer {JWT}
         '400':
           description: Duplicate username. Display msg.
           content:
@@ -154,12 +148,6 @@ paths:
       responses:
         '200':
           description: Login successful. Redirect to data.redirection.
-          headers:
-            Authorization:
-              description: User JWT Authorization. Access with lowercased.
-              schema:
-                type: string
-                example: Bearer {JWT}
           content:
             application/json:
               schema: 
@@ -174,6 +162,9 @@ paths:
                       redirection:
                         type: string
                         example: localhost
+                      token:
+                        type: string
+                        example: Bearer {JWT}
         '401':
           description: Incorrect credentials. Display msg.
           content:

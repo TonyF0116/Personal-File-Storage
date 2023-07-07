@@ -28,8 +28,8 @@ def edit():
     # Unauthorized => Valid token with no auth => Go to account page to get authorization
     if result['msg'] == 'Unauthorized':
         return {'msg': "Unauthorized",
-                'data': {'redirection': '{}?redirection={}&Authorization={}'
-                         .format(url_for('route_account'), url_for('route_edit'), authorization)}}, 302
+                'data': {'redirection': '{}?redirection={}&file_id={}&Authorization={}'
+                         .format(url_for('route_account'), url_for('route_edit'), request.args.get('file_id'), authorization)}}, 302
 
     account_id = result['data']['payload']['account_id']
 

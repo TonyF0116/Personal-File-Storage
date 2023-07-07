@@ -10,6 +10,7 @@ export default {
     data() {
         return {
             page_title: 'Edit Page',
+            file_id: null
         }
     },
     mounted() {
@@ -19,7 +20,8 @@ export default {
     methods: {
         // Authorization Validation
         initialize_edit_page() {
-            axios.post('/api/edit', {}
+            this.file_id = this.$route.query.file_id;
+            axios.post('/api/edit?file_id=' + this.file_id, {}
             ).then(response => {
                 console.log(response);
             }, error => {

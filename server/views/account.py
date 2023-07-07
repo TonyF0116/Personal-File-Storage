@@ -1,4 +1,4 @@
-from flask import Blueprint, request, url_for, make_response
+from flask import Blueprint, request, url_for
 from ..models.account import sign_up, check_username_num, check_password, update_user_info
 from ..config import key
 import jwt
@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from ..utils.jwt_validation import jwt_validation
 from os import path, mkdir
 import base64
+from ..models.index import add_new_file
 
 # Handle requests from the account page
 blueprint = Blueprint('account', __name__, url_prefix='/api/account')
@@ -39,14 +40,9 @@ def account():
             token_info['edit_page_authorization'] = True
 
         token = jwt.encode(payload=token_info, key=key, algorithm="HS256")
-
-        # Make response with the redirection info
-        response = make_response({'msg': "Authorized",
-                                  'data': {'redirection': redirection}})
-
-        # Set the Authorization header
-        response.headers['Authorization'] = 'Bearer {}'.format(token)
-        return response, 200
+        return {'msg': "Authorized",
+                'data': {'redirection': redirection+'?file_id='+request.args.get('file_id'),
+                         'token': 'Bearer {}'.format(token)}}, 200
 
     return {'msg': "Unauthorized",
             'data': {'redirection': redirection}}, 401
@@ -78,13 +74,9 @@ def signup():
     }
     token = jwt.encode(payload=token_info, key=key, algorithm="HS256")
 
-    # Make response with the account_id
-    response = make_response({'msg': "Sign up successful",
-                              'data': {"account_id": user[0][0]}})
-
-    # Set the Authorization header
-    response.headers['Authorization'] = 'Bearer {}'.format(token)
-    return response, 200
+    return {'msg': "Sign up successful",
+            'data': {"account_id": user[0][0],
+                     'token': 'Bearer {}'.format(token)}}, 200
 
 
 @blueprint.route('/login', methods=['POST'])
@@ -127,13 +119,9 @@ def login():
 
     token = jwt.encode(payload=token_info, key=key, algorithm="HS256")
 
-    # Make response with the redirection info
-    response = make_response({'msg': "Login successful",
-                              'data': {'redirection': redirection}})
-
-    # Set the Authorization header
-    response.headers['Authorization'] = 'Bearer {}'.format(token)
-    return response, 200
+    return {'msg': "Login successful",
+            'data': {'redirection': redirection,
+                     'token': 'Bearer {}'.format(token)}}, 200
 
 
 # Update user nickname and avatar suffix
@@ -162,6 +150,8 @@ def new_user_info():
 
         # Update info in the database
         update_user_info(account_id, nickname, avatar_suffix)
+        add_new_file(account_id, avatar_name, 0,
+                     datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         return {'msg': 'Success',
                 'data': None}, 200

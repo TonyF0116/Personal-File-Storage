@@ -87,13 +87,14 @@ export default {
     methods: {
         // Send request to /api/account to get a token with needed authorization
         initialize_account_page() {
-            axios.post('/api/account' + '?redirection=' + this.$route.query.redirection)
+            axios.post('/api/account' + '?redirection=' + this.$route.query.redirection + '&file_id=' + this.$route.query.file_id)
                 .then(response => {
                     console.log(response);
                     if (response.data.msg == 'Authorized') {
                         this.$router.push({
                             path: this.$route.query.redirection, query: {
-                                Authorization: response.headers.authorization
+                                file_id: this.$route.query.file_id,
+                                Authorization: response.data.data.token,
                             }
                         });
                     }
@@ -216,7 +217,7 @@ export default {
                     console.log(response);
                     this.$router.push({
                         path: response.data.data.redirection,
-                        query: { Authorization: response.headers.authorization }
+                        query: { Authorization: response.data.data.token }
                     });
                 }, error => {
                     this.warning = error.response.data.msg;
@@ -238,7 +239,7 @@ export default {
                     console.log(response);
                     this.new_user = true;
                     this.account_id = response.data.data.account_id;
-                    this.authorization_token = response.headers.authorization;
+                    this.authorization_token = response.data.data.token;
                 }, error => {
                     this.warning = error.response.data.msg;
                     console.log(error);
