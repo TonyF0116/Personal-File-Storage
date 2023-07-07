@@ -13,15 +13,15 @@ export default {
         }
     },
     mounted() {
-        axios.defaults.headers.common['Authorization'] = this.$route.query.Authorization
-        this.initialize_edit_page()
+        axios.defaults.headers.common['Authorization'] = this.$route.query.Authorization;
+        this.initialize_edit_page();
     },
     methods: {
         // Authorization Validation
         initialize_edit_page() {
             axios.post('/api/edit', {}
             ).then(response => {
-                console.log(response)
+                console.log(response);
             }, error => {
                 console.log(error);
                 if (error.response.status == 302 || error.response.status == 401) {

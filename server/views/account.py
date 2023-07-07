@@ -4,7 +4,7 @@ from ..config import key
 import jwt
 from datetime import datetime, timedelta, timezone
 from ..utils.jwt_validation import jwt_validation
-import os
+from os import path, mkdir
 import base64
 
 # Handle requests from the account page
@@ -154,13 +154,10 @@ def new_user_info():
         # Save the avatar in the user's files folder
         avatar = base64.b64decode(avatar_data)
 
-        if not os.path.exists('server/files/'):
-            os.mkdir('server/files/')
+        if not path.exists('server/files/{}/'.format(account_id)):
+            mkdir('server/files/{}/'.format(account_id))
 
-        if not os.path.exists('server/files/{}/'.format(account_id)):
-            os.mkdir('server/files/{}/'.format(account_id))
-
-        with open(os.path.join('server/files/{}/{}'.format(account_id, avatar_name)), 'wb') as f:
+        with open(path.join('server/files/{}/{}'.format(account_id, avatar_name)), 'wb') as f:
             f.write(avatar)
 
         # Update info in the database

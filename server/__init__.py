@@ -3,6 +3,7 @@ from .views import account, index, edit, serve
 from flask_cors import CORS
 from flasgger import Swagger
 from .utils.jwt_validation import jwt_validation
+from os import path, mkdir
 
 
 def create_app():
@@ -17,20 +18,6 @@ def create_app():
     app.register_blueprint(account.blueprint)
     app.register_blueprint(index.blueprint)
     app.register_blueprint(edit.blueprint)
-
-    # # Catch all requests that doesn't start with /api
-    # # If route not found, then return 404
-
-    # @app.route('/', defaults={'path': ''})
-    # @app.route('/<path:path>')
-    # def catch_all(path):
-    #     main_pages = ['', 'index', 'index/',
-    #                   'account', 'account/', 'edit', 'edit/']
-    #     if path in main_pages:
-    #         return render_template("index.html")
-    #     else:
-    #         return {'msg': 'Page Not Found',
-    #                 'data': None}, 404
 
     # Routes for the main pages
 
@@ -49,5 +36,8 @@ def create_app():
     @app.route('/edit')
     def route_edit():
         return render_template("index.html")
+
+    if not path.exists('server/files/'):
+        mkdir('server/files/')
 
     return app
