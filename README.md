@@ -16,8 +16,8 @@ Run with the following steps:
 To implement:
 1. ~~Account Page~~
 2. ~~JWT~~
-3. Index Page
-4. Pic
+3. ~~Index Page~~
+4. ~~Pic~~
 5. Edit Page(PDF/Excel) /Email
 6. Swagger
 7. Redis（excel templates）/Log

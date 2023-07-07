@@ -1,4 +1,5 @@
 <template>
+    <img :src="`/avatar?account_id=${this.account_id}&suffix=${this.avatar_suffix}`" class="avatar" alt="avatar">
     <h3 style="text-align: right;">Welcome, {{ name }}</h3>
     <div class="page_title">{{ page_title }}</div>
 
@@ -29,7 +30,7 @@
                 target="_blank" style="float: left;">
                 {{ file[2] }}
             </a>
-            <span style="float: right;"> {{ file[4] }} </span>
+            <span style="text-align: center;"> {{ file[4] }} </span>
         </li>
     </ol>
 </template>
@@ -46,7 +47,7 @@ export default {
             account_id: 0,
             name: "",
             administration: 0,
-            avatar_suffix: "",
+            avatar_suffix: "suffix",
             files: null,
 
             is_pop_up_visible: false,
@@ -152,6 +153,15 @@ export default {
 </script>
 
 <style>
+.avatar {
+    position: absolute;
+    max-width: 130px;
+    max-height: 130px;
+    top: 10px;
+    right: 50%;
+    transform: translate(50%, 0%);
+}
+
 .upload_button {
     background-color: #5750bc;
     border: none;

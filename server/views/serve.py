@@ -1,4 +1,4 @@
-from flask import Blueprint, send_from_directory, send_file
+from flask import Blueprint, send_from_directory, send_file, request
 
 
 # Handle requests for serving static files
@@ -21,3 +21,13 @@ def serve_js(path):
 @blueprint.route('/favicon.ico')
 def serve_favicon():
     return send_file('templates/favicon.ico')
+
+
+# Send requested avatar
+@blueprint.route('/avatar')
+def serve_avatar():
+    account_id = request.args.get('account_id')
+    suffix = request.args.get('suffix')
+    if suffix == 'suffix':
+        return 'Not found', 404
+    return send_file('files/{}/avatar.{}'.format(account_id, suffix))
