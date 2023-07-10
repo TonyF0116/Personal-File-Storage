@@ -2,11 +2,13 @@ from flask import Flask, render_template, request
 from .views import account, index, edit, serve
 from flask_cors import CORS
 from flasgger import Swagger
-from .utils.jwt_validation import jwt_validation
 from os import path, mkdir
 
 
 def create_app():
+    if not path.exists('server/files/'):
+        mkdir('server/files/')
+
     app = Flask(__name__, instance_relative_config=True)
     CORS(app)
     app.config['SWAGGER'] = {'openapi': '3.0.0'}
@@ -36,8 +38,5 @@ def create_app():
     @app.route('/edit')
     def route_edit():
         return render_template("index.html")
-
-    if not path.exists('server/files/'):
-        mkdir('server/files/')
 
     return app
