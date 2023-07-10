@@ -25,3 +25,9 @@ def add_new_file(account_id, file_name, file_type, last_modified):
     else:
         sql = "INSERT INTO files(AccountId, FileName, FileType, LastModified) VALUES ({}, '{}', {}, '{}');"
         db_execute(sql.format(account_id, file_name, file_type, last_modified))
+
+
+# Check belonging of the specific file with the given account_id and file_id, return the file name
+def check_belonging(account_id, file_id):
+    sql = "SELECT FileName FROM files WHERE FileId = {} AND AccountId = {};"
+    return db_execute(sql.format(file_id, account_id))

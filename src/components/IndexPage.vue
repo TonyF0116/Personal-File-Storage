@@ -25,12 +25,17 @@
     </transition>
 
     <ol>
-        <li v-for="file in files" :key="file"><a
-                :href="`/edit?file_id=${encodeURIComponent(file[0])}&Authorization=${this.$route.query.Authorization}`"
-                target="_blank" style="float: left;">
+        <li v-for="file in  files " :key="file"><a
+                :href="'/edit?file_id=' + file[0] + '&Authorization=' + this.$route.query.Authorization" target="_blank"
+                style="float: left;">
                 {{ file[2] }}
             </a>
             <span style="text-align: center;"> {{ file[4] }} </span>
+
+            <span style="right: 0%;"><a :href="'/api/index/download?file_id=' + file[0] + '&Authorization='
+                + this.$route.query.Authorization" :download=file[2]> Download</a>
+            </span>
+            <hr>
         </li>
     </ol>
 </template>
