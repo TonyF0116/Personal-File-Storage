@@ -3,7 +3,7 @@
     <h3 style="text-align: right;">Welcome, {{ name }}</h3>
     <div class="page_title">{{ page_title }}</div>
 
-    <button @click="goToEditPage">Go To Edit Page</button>
+    <button class="generate_button" @click="generate_file_stat">Generate File Stat</button>
 
     <button class="upload_button" @click="show_popup">Upload</button>
     <transition name="fade">
@@ -66,9 +66,15 @@ export default {
         this.initialize_index_page();
     },
     methods: {
-        // Generate the link for the edit page for each file
-        file_edit_page_link(file) {
-            return '/edit?filename=${encodeURIComponent(file)}' + file + 'ad';
+        //Generate file stat
+        generate_file_stat() {
+            axios.post('/api/index/file_stat_generation?account_id=' + this.account_id, {}
+            ).then(response => {
+                console.log(response);
+                this.initialize_index_page();
+            }, error => {
+                console.log(error)
+            })
         },
 
         // Choose file handler, displays file name
@@ -165,6 +171,20 @@ export default {
     top: 10px;
     right: 50%;
     transform: translate(50%, 0%);
+}
+
+.generate_button {
+    background-color: #5750bc;
+    border: none;
+    color: white;
+    padding: 15px 24px;
+    text-align: center;
+    font-size: 24px;
+    border-radius: 10px;
+    position: absolute;
+    top: 20%;
+    left: 75%;
+    transform: translate(-50%, -50%);
 }
 
 .upload_button {

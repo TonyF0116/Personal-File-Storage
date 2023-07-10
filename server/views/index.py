@@ -3,6 +3,10 @@ from ..models.index import get_user_info, get_user_files, add_new_file, check_be
 from ..utils.jwt_validation import jwt_validation
 from datetime import datetime
 from os import path, mkdir
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
 
 # Handle requests from the index page
 blueprint = Blueprint('index', __name__, url_prefix='/api/index')
@@ -106,3 +110,53 @@ def download():
         return send_file('files/{}/{}'.format(account_id, result[0][0]))
     else:
         return "Unauthorized", 401
+
+
+# Route for generating file stat
+@blueprint.route('/file_stat_generation', methods=['POST'])
+def file_stat_generation():
+    try:
+        # Get account_id from request args and user files
+        account_id = request.args.get('account_id')
+        data = get_user_files(account_id)
+
+        # Generate new file
+        doc = SimpleDocTemplate(
+            "server/files/{}/file_stat.pdf".format(account_id), pagesize=letter)
+
+        elements = []
+        title = "File Stat"
+        styles = getSampleStyleSheet()
+        title_text = Paragraph(title, styles['Title'])
+        elements.append(title_text)
+
+        # Update in database
+        add_new_file(account_id, 'file_stat.pdf', 1,
+                     datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        data = get_user_files(account_id)
+
+        # Headaers
+        table_data = [['File Id', 'File Name', 'File Type', 'Last Modified']]
+        for item in data:
+            row = [item[0], item[2], item[3], item[4]]
+            table_data.append(row)
+
+        # Render the file
+        table = Table(table_data)
+        table.setStyle(TableStyle([('GRID', (0, 0), (-1, -1), 1, colors.black),
+                                   ('BACKGROUND', (0, 0), (-1, 0), colors.blue),
+                                   ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                                   ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                                   ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                                   ('FONTSIZE', (0, 0), (-1, 0), 12),
+                                   ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                                   ]))
+        elements.append(table)
+        doc.build(elements)
+
+        return {'msg': 'Generated Successfully.',
+                'data': None}, 200
+    except Exception as error:
+        print(error)
+        return {'msg': 'Generated Failed. Check server terminal for more info.',
+                'data': None}, 500
