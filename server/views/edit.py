@@ -1,7 +1,8 @@
 from flask import Blueprint, url_for, request, send_file
 from ..utils.jwt_validation import jwt_validation
-from ..models.edit import get_file_info
+from ..models.edit import get_file_info, update_file_modify_time
 import pandas as pd
+from datetime import datetime
 
 # Handle requests from the edit page
 blueprint = Blueprint('edit', __name__, url_prefix='/api/edit')
@@ -96,6 +97,10 @@ def save_excel():
                 df.iat[row_index, cell_index] = value
 
         df.to_excel(file_path, header=False, index=False)
+
+        # Update last modified time
+        update_file_modify_time(
+            file_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         return {'msg': 'Save successful',
                 'data': None}, 200
