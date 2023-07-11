@@ -10,7 +10,7 @@
         <div v-if="is_pop_up_visible" class="popup" @click.self="close_popup">
             <div class="popup_content">
                 <input type="file" id="fileInput" @change="choose_file_clicked"
-                    accept=".jpg, .jpeg, .png, .pdf, .xls .xlsx">
+                    accept=".jpg, .jpeg, .png, .pdf, .xls, .xlsx">
                 <label for="fileInput" class="choose_file_button">Choose File</label>
 
                 <p>{{ choose_file_message }}</p>

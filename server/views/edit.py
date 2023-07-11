@@ -1,6 +1,7 @@
 from flask import Blueprint, url_for, request, send_file
 from ..utils.jwt_validation import jwt_validation
 from ..models.edit import get_file_info
+import pandas as pd
 
 # Handle requests from the edit page
 blueprint = Blueprint('edit', __name__, url_prefix='/api/edit')
@@ -66,3 +67,40 @@ def get_file():
             pass
     else:
         return send_file('files/{}/{}'.format(file_info[0][0], file_info[0][1]))
+
+
+# Route for updating excel files
+@blueprint.route('/save_excel', methods=['POST'])
+def save_excel():
+    # Retrieve the file id and updated data from the request
+    excel_data = request.get_json()
+    file_id = request.args.get('file_id')
+
+    # Get belonging and file name from the database
+    file_info = get_file_info(file_id)
+    account_id = file_info[0][0]
+    file_name = file_info[0][1]
+
+    # Construct file path
+    file_path = 'server/files/{}/{}'.format(account_id, file_name)
+
+    # Do the update
+    try:
+        df = pd.read_excel(file_path, header=None)
+        max_rows = max(len(df), len(excel_data))
+        max_cols = max(len(df.columns), max(len(row) for row in excel_data))
+        df = df.reindex(index=range(max_rows), columns=range(max_cols))
+
+        for row_index, row in enumerate(excel_data):
+            for cell_index, value in enumerate(row):
+                df.iat[row_index, cell_index] = value
+
+        df.to_excel(file_path, header=False, index=False)
+
+        return {'msg': 'Save successful',
+                'data': None}, 200
+
+    except Exception as error:
+        print(error)
+        return {'msg': 'Save Failed. Check server terminal for more info.',
+                'data': None}, 500
