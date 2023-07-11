@@ -1,4 +1,8 @@
 <template>
+    <label style="position: absolute;left: 25%;top: 5%;">Email address</label>
+    <input type="text" v-model="email" style="position: absolute;left: 25%;top: 10%;">
+    <button style="position: absolute;left: 25%;top: 20%;" @click="share_file">Share</button>
+
     <button style="position: absolute;left: 10%;top: 5%;" @click="back_to_index_page">Back</button>
     <div class="page_title">{{ page_title }}</div>
     <div v-if="file_type == 0">
@@ -50,14 +54,29 @@ export default {
             total_page_num: null,
             cur_page: 1,
             excel_data: [],
+            email: ""
         }
     },
     mounted() {
         axios.defaults.headers.common['Authorization'] = this.$route.query.Authorization;
         this.initialize_edit_page();
-
     },
     methods: {
+        // Share file via email
+        share_file() {
+            if (this.email == "") {
+                alert('Email address cannot be empty!');
+                return;
+            }
+            axios.post('/api/edit/share?file_id=' + this.file_id + '&email=' + this.email + '&Authorization=' + this.$route.query.Authorization)
+                .then(response => {
+                    console.log(response);
+                    alert('Successfully shared!')
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        },
         // Generate pdf file from excel
         excel_to_pdf() {
             axios.post('/api/edit/excel_to_pdf?file_id=' + this.file_id)

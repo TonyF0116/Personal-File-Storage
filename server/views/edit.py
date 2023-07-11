@@ -1,12 +1,20 @@
 from flask import Blueprint, url_for, request, send_file
 from ..utils.jwt_validation import jwt_validation
 from ..models.edit import get_file_info, update_file_modify_time
-from ..models.index import add_new_file
+from ..models.index import add_new_file, check_belonging
 import pandas as pd
 from datetime import datetime
+from ..config import sender_email, smtp_server, smtp_port, email_username, email_password
+
 from openpyxl import load_workbook
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
 
 # Handle requests from the edit page
 blueprint = Blueprint('edit', __name__, url_prefix='/api/edit')
@@ -165,3 +173,61 @@ def excel_to_pdf():
         print(error)
         return {'msg': 'Save Failed. Check server terminal for more info.',
                 'data': None}, 500
+
+
+# Route for email file sharing
+@blueprint.route('/share', methods=['POST'])
+def share():
+    # Retrieve the email, authorization token and file_id from request args
+    authorization = request.args.get('Authorization')
+    file_id = request.args.get('file_id')
+    email = request.args.get('email')
+
+    # Decode the JWT token
+    token = authorization[7:]
+    result = jwt_validation(token, url_for('route_index'))
+
+    # Validation failed => Invalid token => Login again
+    if result['msg'] == 'Validation failed':
+        return {'msg': 'Validation failed',
+                'data': {'redirection': '{}?redirection={}&warning=Login+Expired'
+                         .format(url_for('route_account'), url_for('route_index'))}}, 401
+
+    # Retrieve account_id and check belonging
+    account_id = result['data']['payload']['account_id']
+    result = check_belonging(account_id, file_id)
+    if len(result) == 1:
+        file_path = 'server/files/{}/{}'.format(account_id, result[0][0])
+        file_name = result[0][0]
+
+        subject = 'PFS system email'
+        message = 'User {} shared a file with you.'.format(account_id)
+
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(message, 'plain'))
+
+        attachment = MIMEBase('application', 'octet-stream')
+        with open(file_path, 'rb') as f:
+            attachment.set_payload(f.read())
+        encoders.encode_base64(attachment)
+        attachment.add_header('Content-Disposition',
+                              f'attachment; filename="{file_name}"')
+        msg.attach(attachment)
+
+        try:
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                server.login(email_username, email_password)
+                server.sendmail(sender_email, email, msg.as_string())
+        except Exception as error:
+            print(error)
+            return {'msg': 'Share Failed. Check server terminal for more info.',
+                    'data': None}, 500
+
+        return {'msg': "Success",
+                'data': None}, 200
+    else:
+        return {'msg': "Unauthorized",
+                'data': None}, 401
