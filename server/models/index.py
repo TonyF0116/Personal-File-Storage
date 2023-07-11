@@ -31,3 +31,9 @@ def add_new_file(account_id, file_name, file_type, last_modified):
 def check_belonging(account_id, file_id):
     sql = "SELECT FileName FROM files WHERE FileId = {} AND AccountId = {};"
     return db_execute(sql.format(file_id, account_id))
+
+
+# Delete file with the given file id
+def delete_file(file_id):
+    sql = "DELETE FROM files WHERE FileId = {};"
+    db_execute(sql.format(file_id))

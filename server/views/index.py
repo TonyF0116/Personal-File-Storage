@@ -1,8 +1,8 @@
 from flask import Blueprint, request, url_for, send_file
-from ..models.index import get_user_info, get_user_files, add_new_file, check_belonging
+from ..models.index import get_user_info, get_user_files, add_new_file, check_belonging, delete_file
 from ..utils.jwt_validation import jwt_validation
 from datetime import datetime
-from os import path, mkdir
+from os import path, mkdir, remove
 
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
@@ -110,7 +110,8 @@ def download():
     if len(result) == 1:
         return send_file('files/{}/{}'.format(account_id, result[0][0]))
     else:
-        return "Unauthorized", 401
+        return {'msg': "Unauthorized",
+                'data': None}, 401
 
 
 # Route for generating file stat
@@ -161,3 +162,33 @@ def file_stat_generation():
         print(error)
         return {'msg': 'Generated Failed. Check server terminal for more info.',
                 'data': None}, 500
+
+
+# Route for deleting a file
+@blueprint.route('/delete', methods=['DELETE'])
+def delete():
+    # Retrieve the authorization token and file_id from request args
+    authorization = request.args.get('Authorization')
+    file_id = request.args.get('file_id')
+
+    # Decode the JWT token
+    token = authorization[7:]
+    result = jwt_validation(token, url_for('route_index'))
+
+    # Validation failed => Invalid token => Login again
+    if result['msg'] == 'Validation failed':
+        return {'msg': 'Validation failed',
+                'data': {'redirection': '{}?redirection={}&warning=Login+Expired'
+                         .format(url_for('route_account'), url_for('route_index'))}}, 401
+
+    # Retrieve account_id and check belonging
+    account_id = result['data']['payload']['account_id']
+    result = check_belonging(account_id, file_id)
+    if len(result) == 1:
+        remove('server/files/{}/{}'.format(account_id, result[0][0]))
+        delete_file(file_id)
+        return {'msg': "Deleted",
+                'data': None}, 200
+    else:
+        return {'msg': "Unauthorized",
+                'data': None}, 401

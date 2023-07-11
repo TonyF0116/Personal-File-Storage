@@ -1,4 +1,5 @@
 <template>
+    <button @click="back_to_index_page">Back</button>
     <div class="page_title">{{ page_title }}</div>
     <div v-if="file_type == 0">
         <img :src="`/api/edit/get_file?file_id=${this.file_id}&account_id=${this.account_id}`" class="image" alt="image">
@@ -56,6 +57,10 @@ export default {
 
     },
     methods: {
+        // Function for going back to index page
+        back_to_index_page() {
+            this.$router.push('/index?Authorization=' + this.$route.query.Authorization);
+        },
         // Send the server the updated excel file data
         save_excel() {
             axios.post('/api/edit/save_excel?file_id=' + this.file_id, this.excel_data)

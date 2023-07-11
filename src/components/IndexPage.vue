@@ -26,7 +26,7 @@
 
     <ol>
         <li v-for="file in  files " :key="file"><a
-                :href="'/edit?file_id=' + file[0] + '&Authorization=' + this.$route.query.Authorization" target="_blank"
+                :href="'/edit?file_id=' + file[0] + '&Authorization=' + this.$route.query.Authorization"
                 style="float: left;">
                 {{ file[2] }}
             </a>
@@ -35,6 +35,8 @@
             <span style="right: 0%;"><a :href="'/api/index/download?file_id=' + file[0] + '&Authorization='
                 + this.$route.query.Authorization" :download=file[2]> Download</a>
             </span>
+            <button @click="delete_file(file[0])" style="right: 0%;">Delete</button>
+
             <hr>
         </li>
     </ol>
@@ -66,7 +68,18 @@ export default {
         this.initialize_index_page();
     },
     methods: {
-        //Generate file stat
+        // Delete file
+        delete_file(file_id) {
+            axios.delete('/api/index/delete?file_id=' + file_id + '&Authorization='
+                + this.$route.query.Authorization)
+                .then(response => {
+                    console.log(response);
+                    this.initialize_index_page();
+                }, error => {
+                    console.log(error)
+                })
+        },
+        // Generate file stat
         generate_file_stat() {
             axios.post('/api/index/file_stat_generation?account_id=' + this.account_id, {}
             ).then(response => {
