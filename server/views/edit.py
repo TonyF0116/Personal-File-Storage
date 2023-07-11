@@ -1,8 +1,12 @@
 from flask import Blueprint, url_for, request, send_file
 from ..utils.jwt_validation import jwt_validation
 from ..models.edit import get_file_info, update_file_modify_time
+from ..models.index import add_new_file
 import pandas as pd
 from datetime import datetime
+from openpyxl import load_workbook
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 # Handle requests from the edit page
 blueprint = Blueprint('edit', __name__, url_prefix='/api/edit')
@@ -103,6 +107,58 @@ def save_excel():
             file_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         return {'msg': 'Save successful',
+                'data': None}, 200
+
+    except Exception as error:
+        print(error)
+        return {'msg': 'Save Failed. Check server terminal for more info.',
+                'data': None}, 500
+
+
+# Route for generating pdf from excel
+@blueprint.route('/excel_to_pdf', methods=['POST'])
+def excel_to_pdf():
+    # Retrieve file id from request args
+    file_id = request.args.get('file_id')
+
+    # Get belonging and file name from the database
+    file_info = get_file_info(file_id)
+    account_id = file_info[0][0]
+    file_name = file_info[0][1]
+
+    try:
+
+        # Load excel file
+        sheet = load_workbook(
+            'server/files/{}/{}'.format(account_id, file_name)).active
+
+        # Construct new file name
+        new_file_name_tmp = file_name.split('.')
+        new_file_name = ''.join(new_file_name_tmp[0:len(new_file_name_tmp)-1])
+
+        # Create pdf file
+        pdf = canvas.Canvas(
+            'server/files/{}/{}.pdf'.format(account_id, new_file_name), pagesize=letter)
+
+        pdf.setFont("Helvetica", 12)
+        y = 750
+
+        # Iterate through each row and column in the sheet
+        for row in sheet.iter_rows(values_only=True):
+            x = 50
+            for cell in row:
+                # Add the cell value to the PDF
+                pdf.drawString(x, y, str(cell))
+                x += 100
+            y -= 20
+
+        # Save the PDF file
+        pdf.save()
+
+        add_new_file(account_id, '{}.pdf'.format(new_file_name),
+                     1, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+        return {'msg': 'Build successful',
                 'data': None}, 200
 
     except Exception as error:

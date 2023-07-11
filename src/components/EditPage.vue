@@ -1,5 +1,5 @@
 <template>
-    <button @click="back_to_index_page">Back</button>
+    <button style="position: absolute;left: 10%;top: 5%;" @click="back_to_index_page">Back</button>
     <div class="page_title">{{ page_title }}</div>
     <div v-if="file_type == 0">
         <img :src="`/api/edit/get_file?file_id=${this.file_id}&account_id=${this.account_id}`" class="image" alt="image">
@@ -13,6 +13,7 @@
         <canvas ref="canvas"></canvas>
     </div>
     <div v-if="file_type == 2">
+        <button style="position: absolute;left: 80%;top: 5%;" @click="excel_to_pdf">Create pdf from excel</button>
         <table>
             <tbody>
                 <tr v-for="(row, row_index) in excel_data" :key="row_index">
@@ -57,6 +58,17 @@ export default {
 
     },
     methods: {
+        // Generate pdf file from excel
+        excel_to_pdf() {
+            axios.post('/api/edit/excel_to_pdf?file_id=' + this.file_id)
+                .then(response => {
+                    console.log(response);
+                    this.$router.push('/index?Authorization=' + this.$route.query.Authorization);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        },
         // Function for going back to index page
         back_to_index_page() {
             this.$router.push('/index?Authorization=' + this.$route.query.Authorization);

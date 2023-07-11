@@ -4,5 +4,5 @@ PyMySQL
 PyJWT
 Flasgger
 reportlab
-fpdf
+openpyxl
 pandas
