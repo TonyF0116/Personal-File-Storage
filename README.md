@@ -8,7 +8,7 @@ flasgger is used for api demonstration. Visit http://127.0.0.1:5000/apidocs/ whe
 
 Run with the following steps:
 
-1. Run pip install -r requirements.txt
+1. Run pip install -r requirements.txt && npm install
 2. Modify database configurations in personal_file_storage/config.py
 3. Make sure the terminal is at the root folder for this repo, which contains this 'README.md' (otherwise, file uploading and storing might be affected)
 4. Run app.py
