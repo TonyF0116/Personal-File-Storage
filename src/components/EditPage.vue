@@ -20,7 +20,7 @@
                     <td v-for="(cell, cell_index) in row" :key="cell_index">
                         <input v-model="excel_data[row_index][cell_index]">
                     </td>
-                    <button style="margin-top: 18px;margin-left: -100px;" @click="add_cell(row)">Add Cell</button>
+                    <button style="margin-top: 18px;" @click="add_cell(row)">Add Cell</button>
                 </tr>
                 <button style="margin-top: 10px;" @click="add_row">Add Row</button>
             </tbody>

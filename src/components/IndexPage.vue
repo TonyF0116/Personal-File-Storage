@@ -3,6 +3,12 @@
     <h3 style="text-align: right;">Welcome, {{ name }}</h3>
     <div class="page_title">{{ page_title }}</div>
 
+    <label style="position: absolute; top: 10%; left: 25%; transform: translate(-50%, -50%);">Filename</label>
+    <input type="text" v-model="new_file_name"
+        style="position: absolute; top: 15%; left: 25%; transform: translate(-50%, -50%);">
+    <button style="position: absolute; top: 20%; left: 25%; transform: translate(-50%, -50%);" @click="new_excel_file">New
+        Excel File</button>
+
     <button class="generate_button" @click="generate_file_stat">Generate File Stat</button>
 
     <button class="upload_button" @click="show_popup">Upload</button>
@@ -61,6 +67,7 @@ export default {
             choose_file_message: "",
             upload_msg: "",
             file_to_upload: null,
+            new_file_name: "",
         }
     },
     mounted() {
@@ -68,6 +75,20 @@ export default {
         this.initialize_index_page();
     },
     methods: {
+        // Create new excel file
+        new_excel_file() {
+            if (this.new_file_name == "") {
+                alert('Empty file name!');
+                return;
+            }
+            axios.post('/api/index/new_excel_file?file_name=' + this.new_file_name + '&account_id=' + this.account_id)
+                .then(response => {
+                    console.log(response);
+                    this.initialize_index_page();
+                }, error => {
+                    console.log(error)
+                })
+        },
         // Delete file
         delete_file(file_id) {
             axios.delete('/api/index/delete?file_id=' + file_id + '&Authorization='

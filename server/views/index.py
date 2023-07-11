@@ -3,6 +3,7 @@ from ..models.index import get_user_info, get_user_files, add_new_file, check_be
 from ..utils.jwt_validation import jwt_validation
 from datetime import datetime
 from os import path, mkdir, remove
+import pandas as pd
 
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
@@ -192,3 +193,30 @@ def delete():
     else:
         return {'msg': "Unauthorized",
                 'data': None}, 401
+
+
+# Route for creating new excel file
+@blueprint.route('/new_excel_file', methods=['POST'])
+def new_excel_file():
+    # Get account_id and file name from request args
+    account_id = request.args.get('account_id')
+    file_name = request.args.get('file_name')
+
+    # Try create a new excel file
+    if not path.exists('server/files/{}/'.format(account_id)):
+        mkdir('server/files/{}/'.format(account_id))
+    try:
+        df = pd.DataFrame([[]])
+        df.to_excel('server/files/{}/{}.xlsx'.format(account_id,
+                    file_name), header=False, index=False)
+    except Exception as error:
+        print(error)
+        return {'msg': 'Create file failed. Check server terminal for more info.',
+                'data': None}, 500
+
+    # Update in databse
+    add_new_file(account_id, '{}.xlsx'.format(file_name), 2,
+                 datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+    return {'msg': 'File created successfully.',
+            'data': None}, 200
