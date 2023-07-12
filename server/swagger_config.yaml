@@ -4,7 +4,7 @@ info:
   description: API Documentation for person file storage system
   version: 1.0.0
 servers:
-  - url: 'http://127.0.0.1:5000'
+  - url: "http://127.0.0.1:5000"
     description: localhost
 
 components:
@@ -12,9 +12,7 @@ components:
     jwtTokenAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT 
-
-
+      bearerFormat: JWT
 
 paths:
   /api/account:
@@ -33,11 +31,11 @@ paths:
             type: string
 
       responses:
-        '200':
+        "200":
           description: Validation success. Authorized.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -52,11 +50,11 @@ paths:
                       token:
                         type: string
                         example: Bearer {JWT}
-        '401':
+        "401":
           description: Validation failed.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -88,11 +86,11 @@ paths:
                   type: string
                   description: SHA256 hash for the user entered password.
       responses:
-        '200':
+        "200":
           description: Sign up successful. Client redirect to upload user info page.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -107,11 +105,11 @@ paths:
                       token:
                         type: string
                         example: Bearer {JWT}
-        '400':
+        "400":
           description: Duplicate username. Display msg.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -120,7 +118,7 @@ paths:
                   data:
                     type: object
                     example: null
-          
+
   /api/account/login:
     post:
       summary: Handles login requests
@@ -146,11 +144,11 @@ paths:
                   type: string
                   description: SHA256 hash for the user entered password.
       responses:
-        '200':
+        "200":
           description: Login successful. Redirect to data.redirection.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -165,11 +163,11 @@ paths:
                       token:
                         type: string
                         example: Bearer {JWT}
-        '401':
+        "401":
           description: Incorrect credentials. Display msg.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -178,7 +176,7 @@ paths:
                   data:
                     type: object
                     example: null
-                    
+
   /api/account/new_user_info:
     post:
       summary: Update user nickname and avatar suffix
@@ -205,11 +203,11 @@ paths:
                   description: User account id.
 
       responses:
-        '200':
+        "200":
           description: Upload successful.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -218,11 +216,11 @@ paths:
                   data:
                     type: object
                     example: null
-        '500':
+        "500":
           description: Upload failed.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -230,21 +228,21 @@ paths:
                     example: Unknown error. Check server terminal for more info.
                   data:
                     type: object
-                    example: null      
-  
+                    example: null
+
   /api/index:
     post:
-      summary: Validating authorization and get basic user information
+      summary: Validate authorization and get basic user information
       tags:
         - Index
       security:
         - jwtTokenAuth: []
       responses:
-        '200':
+        "200":
           description: Validation successful.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -255,7 +253,7 @@ paths:
                     properties:
                       user_info:
                         type: object
-                        properties: 
+                        properties:
                           AccountId:
                             type: integer
                             example: 1
@@ -276,7 +274,7 @@ paths:
                             example: jpg / jpeg / png
                       user_files:
                         type: object
-                        properties: 
+                        properties:
                           FileId:
                             type: integer
                             example: 1
@@ -292,11 +290,11 @@ paths:
                           LastModified:
                             type: string
                             example: 2023-01-01 00:00:00
-        '302':
+        "302":
           description: Validation succeeded but not authorized.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -307,12 +305,12 @@ paths:
                     properties:
                       redirection:
                         type: string
-                        example: localhost                  
-        '401':
+                        example: localhost
+        "401":
           description: Validation failed.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -324,7 +322,7 @@ paths:
                       redirection:
                         type: string
                         example: localhost
-                        
+
   /api/index/upload_file:
     post:
       summary: Upload file
@@ -341,14 +339,14 @@ paths:
                   type: integer
                   description: User account id.
                 file:
-                  type: file
+                  type: object
                   description: File to upload. Transmitted in request.files['file'].
       responses:
-        '200':
+        "200":
           description: Upload successful.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -357,11 +355,11 @@ paths:
                   data:
                     type: object
                     example: null
-        '500':
+        "500":
           description: Error occurred when saving file.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -370,7 +368,179 @@ paths:
                   data:
                     type: object
                     example: null
-                        
+
+  /api/index/download:
+    get:
+      summary: Retrieves and serves the requested file for download, based on the provided authorization and file ID.
+      tags:
+        - Index
+      parameters:
+        - name: Authorization
+          in: query
+          description: The authorization token
+          required: true
+          schema:
+            type: string
+        - name: file_id
+          in: query
+          description: The ID of the file to download
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                example: file
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Unauthorized
+                  data:
+                    type: object
+                    example: null
+
+  /api/index/file_stat_generation:
+    post:
+      summary: Generates a PDF file containing statistics of the user's files.
+      tags:
+        - Index
+      parameters:
+        - name: account_id
+          in: query
+          description: Account ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Generated successfully
+                  data:
+                    type: object
+                    example: null
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Generated Failed. Check server terminal for more info.
+                  data:
+                    type: object
+                    example: null
+
+  /api/index/delete:
+    delete:
+      summary: Deletes the specified file if the user is authorized to access it.
+      tags:
+        - Index
+      parameters:
+        - name: Authorization
+          in: query
+          description: The authorization token
+          required: true
+          schema:
+            type: string
+        - name: file_id
+          in: query
+          description: The ID of the file to delete
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Deleted
+                  data:
+                    type: object
+                    example: null
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Unauthorized
+                  data:
+                    type: object
+                    example: null
+
+  /api/index/new_excel_file:
+    post:
+      summary: Creates a new Excel file for the specified account.
+      tags:
+        - Index
+      parameters:
+        - name: account_id
+          in: query
+          description: Account ID
+          required: true
+          schema:
+            type: string
+        - name: file_name
+          in: query
+          description: Name of the new Excel file
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: File created successfully.
+                  data:
+                    type: object
+                    example: null
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Create file failed. Check server terminal for more info.
+                  data:
+                    type: object
+                    example: null
+
   /api/edit:
     post:
       summary: Validating authorization
@@ -379,11 +549,11 @@ paths:
       security:
         - jwtTokenAuth: []
       responses:
-        '200':
+        "200":
           description: Validation successful.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -394,12 +564,12 @@ paths:
                     properties:
                       account_id:
                         type: integer
-                        example: 1  
-        '302':
+                        example: 1
+        "302":
           description: Validation succeeded but not authorized. / No file_id provided
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -410,12 +580,12 @@ paths:
                     properties:
                       redirection:
                         type: string
-                        example: localhost                  
-        '401':
+                        example: localhost
+        "401":
           description: Validation failed.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   msg:
@@ -427,6 +597,3 @@ paths:
                       redirection:
                         type: string
                         example: localhost
-
-
-
