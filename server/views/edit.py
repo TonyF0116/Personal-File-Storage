@@ -171,7 +171,7 @@ def excel_to_pdf():
 
     except Exception as error:
         print(error)
-        return {'msg': 'Save Failed. Check server terminal for more info.',
+        return {'msg': 'Build Failed. Check server terminal for more info.',
                 'data': None}, 500
 
 
