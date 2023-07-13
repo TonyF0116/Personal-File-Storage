@@ -68,7 +68,7 @@ export default {
                 alert('Email address cannot be empty!');
                 return;
             }
-            axios.post('/api/edit/share?file_id=' + this.file_id + '&email=' + this.email + '&Authorization=' + this.$route.query.Authorization)
+            axios.post('/api/edit/share?file_id=' + this.file_id + '&email=' + this.email)
                 .then(response => {
                     console.log(response);
                     alert('Successfully shared!')
@@ -114,7 +114,6 @@ export default {
         // Load excel file function
         load_excel() {
             axios.get('/api/edit/get_file?file_id=' + this.file_id + '&account_id=' + this.account_id, { responseType: 'arraybuffer' })
-                // axios.get('http://127.0.0.1:5000/api/edit/get_file?file_id=5&account_id=1', { responseType: 'arraybuffer' })
                 .then((response) => {
                     const data = new Uint8Array(response.data);
                     const workbook = read(data, { type: 'array' });
@@ -124,8 +123,6 @@ export default {
                     console.error(error);
                 });
         },
-
-
 
         prev_page() {
             if (this.cur_page == 1) {

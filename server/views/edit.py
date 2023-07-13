@@ -178,8 +178,8 @@ def excel_to_pdf():
 # Route for email file sharing
 @blueprint.route('/share', methods=['POST'])
 def share():
-    # Retrieve the email, authorization token and file_id from request args
-    authorization = request.args.get('Authorization')
+    # Retrieve the email, authorization token and file_id from the request
+    authorization = request.headers.get('Authorization')
     file_id = request.args.get('file_id')
     email = request.args.get('email')
 

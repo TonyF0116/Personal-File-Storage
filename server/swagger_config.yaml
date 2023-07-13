@@ -454,6 +454,8 @@ paths:
       summary: Deletes the specified file if the user is authorized to access it.
       tags:
         - Index
+      security:
+        - jwtTokenAuth: []
       parameters:
         - name: Authorization
           in: query
@@ -720,6 +722,8 @@ paths:
       summary: Shares the specified file with the provided email address via email.
       tags:
         - Edit
+      security:
+        - jwtTokenAuth: []
       parameters:
         - name: Authorization
           in: query

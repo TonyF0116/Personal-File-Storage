@@ -91,8 +91,7 @@ export default {
         },
         // Delete file
         delete_file(file_id) {
-            axios.delete('/api/index/delete?file_id=' + file_id + '&Authorization='
-                + this.$route.query.Authorization)
+            axios.delete('/api/index/delete?file_id=' + file_id)
                 .then(response => {
                     console.log(response);
                     this.initialize_index_page();

@@ -168,8 +168,8 @@ def file_stat_generation():
 # Route for deleting a file
 @blueprint.route('/delete', methods=['DELETE'])
 def delete():
-    # Retrieve the authorization token and file_id from request args
-    authorization = request.args.get('Authorization')
+    # Retrieve the authorization token and file_id from the request
+    authorization = request.headers.get('Authorization')
     file_id = request.args.get('file_id')
 
     # Decode the JWT token
