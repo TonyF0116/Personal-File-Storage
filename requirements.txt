@@ -1,9 +1,8 @@
-Flask
-flask-cors
-PyMySQL
-PyJWT
-Flasgger
-reportlab
-openpyxl
-pandas
-redis
+flasgger==0.9.7.1
+Flask==2.3.2
+Flask-Cors==4.0.0
+openpyxl==3.0.10
+PyJWT==2.4.0
+PyMySQL==1.1.0
+redis==4.6.0
+reportlab==4.0.4
