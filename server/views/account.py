@@ -163,7 +163,7 @@ def new_user_info():
     except Exception as error:
         print(error)
         return {'msg': 'Unknown error. Check server terminal for more info.',
-                'data': None}, 500
+                'data': {'error': str(error)}}, 500
 
 
 # Route for getting all logged in user info

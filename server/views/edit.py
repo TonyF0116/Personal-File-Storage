@@ -120,7 +120,7 @@ def save_excel():
     except Exception as error:
         print(error)
         return {'msg': 'Save Failed. Check server terminal for more info.',
-                'data': None}, 500
+                'data': {'error': str(error)}}, 500
 
 
 # Route for generating pdf from excel
@@ -172,7 +172,7 @@ def excel_to_pdf():
     except Exception as error:
         print(error)
         return {'msg': 'Build Failed. Check server terminal for more info.',
-                'data': None}, 500
+                'data': {'error': str(error)}}, 500
 
 
 # Route for email file sharing
@@ -224,7 +224,7 @@ def share():
         except Exception as error:
             print(error)
             return {'msg': 'Share Failed. Check server terminal for more info.',
-                    'data': None}, 500
+                    'data': {'error': str(error)}}, 500
 
         return {'msg': "Success",
                 'data': None}, 200

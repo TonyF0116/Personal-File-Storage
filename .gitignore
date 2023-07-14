@@ -1,5 +1,6 @@
 files/
 testing.py
+server.log
 
 .DS_Store
 node_modules

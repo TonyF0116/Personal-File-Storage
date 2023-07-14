@@ -67,7 +67,7 @@ def upload_file():
     except Exception as error:
         print(error)
         return {'msg': 'Save file failed. Check server terminal for more info.',
-                'data': None}, 500
+                'data': {'error': str(error)}}, 500
 
     # Retrieve file_suffix and decide file_type
     file_suffix = file_name.split('.')[-1]
@@ -162,7 +162,7 @@ def file_stat_generation():
     except Exception as error:
         print(error)
         return {'msg': 'Generated Failed. Check server terminal for more info.',
-                'data': None}, 500
+                'data': {'error': str(error)}}, 500
 
 
 # Route for deleting a file
@@ -212,7 +212,7 @@ def new_excel_file():
     except Exception as error:
         print(error)
         return {'msg': 'Create file failed. Check server terminal for more info.',
-                'data': None}, 500
+                'data': {'error': str(error)}}, 500
 
     # Update in databse
     add_new_file(account_id, '{}.xlsx'.format(file_name), 2,

@@ -3,6 +3,8 @@ from .views import account, index, edit, serve
 from flask_cors import CORS
 from flasgger import Swagger
 from os import path, mkdir
+import logging
+import json
 
 
 def create_app():
@@ -15,6 +17,33 @@ def create_app():
     swagger = Swagger(app, template_file='swagger_config.yaml')
 
     app.config.from_mapping(SECRET_KEY='dev')
+
+    # Configuration for logging
+    log_formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(message)s')
+    file_handler = logging.FileHandler('server.log')
+    file_handler.setFormatter(log_formatter)
+    app.logger.addHandler(file_handler)
+    app.logger.setLevel(logging.DEBUG)
+
+    @app.before_request
+    def log_request():
+        if not (request.path.startswith('/js') or request.path.startswith('/css')
+                or request.path.startswith('/avatar') or request.path.startswith('/favicon.ico')):
+            log_message = f"[{request.method}] {request.url}\n"
+            log_message += f"Authorization header: {request.headers.get('Authorization')}"
+            if request.form:
+                log_message += f"\nForm Data: {request.form}"
+
+            app.logger.info(log_message)
+
+    @app.after_request
+    def log_response(response):
+        if not (request.path.startswith('/js') or request.path.startswith('/css')
+                or request.path.startswith('/avatar') or request.path.startswith('/favicon.ico')):
+            log_message = f"Response: {response.status} {json.dumps(response.json)}\n"
+            app.logger.info(log_message)
+        return response
 
     app.register_blueprint(serve.blueprint)
     app.register_blueprint(account.blueprint)
