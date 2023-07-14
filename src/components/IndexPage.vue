@@ -30,6 +30,10 @@
         </div>
     </transition>
 
+    <div v-if="administration == 1">
+        <button @click="show_logged_in_users">Show logged in users</button>
+    </div>
+
     <ol>
         <li v-for="file in  files " :key="file"><a
                 :href="'/edit?file_id=' + file[0] + '&Authorization=' + this.$route.query.Authorization"
@@ -75,6 +79,15 @@ export default {
         this.initialize_index_page();
     },
     methods: {
+        // Show logged in users
+        show_logged_in_users() {
+            axios.post('/api/account/get_logged_in_users')
+                .then(response => {
+                    alert(response.data.data.users)
+                }, error => {
+                    console.log(error)
+                })
+        },
         // Create new excel file
         new_excel_file() {
             if (this.new_file_name == "") {

@@ -230,6 +230,29 @@ paths:
                     type: object
                     example: null
 
+  /api/account/get_logged_in_users:
+    post:
+      summary: Getting all logged in user info
+      tags:
+        - Account
+      responses:
+        "200":
+          description: Get successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      users:
+                        type: string
+                        example: "Account_id: 1; Login_time: 2023-01-01 00:00:00; Expire: 2023-01-01 01:00:00"
+
   /api/index:
     post:
       summary: Validate authorization and get basic user information

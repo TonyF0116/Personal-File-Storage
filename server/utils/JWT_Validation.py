@@ -1,5 +1,5 @@
 import jwt
-from ..config import key
+from ..config import jwt_key
 
 
 # Validate the jwt token, check if authorized for the target url
@@ -9,7 +9,7 @@ def jwt_validation(token, taget_url):
     # If token exist, try decode the token
     if token != None:
         try:
-            payload = jwt.decode(jwt=token, key=key, algorithms=["HS256"])
+            payload = jwt.decode(jwt=token, key=jwt_key, algorithms=["HS256"])
         except jwt.ExpiredSignatureError:
             pass
         except jwt.DecodeError:

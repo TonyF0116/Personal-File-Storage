@@ -1,6 +1,6 @@
-from flask import Blueprint, request, url_for
+from flask import Blueprint, request, url_for, current_app
 from ..models.account import sign_up, check_username_num, check_password, update_user_info
-from ..config import key
+from ..config import jwt_key
 import jwt
 from datetime import datetime, timedelta, timezone
 from ..utils.jwt_validation import jwt_validation
@@ -39,7 +39,7 @@ def account():
         if 'edit' in redirection:
             token_info['edit_page_authorization'] = True
 
-        token = jwt.encode(payload=token_info, key=key, algorithm="HS256")
+        token = jwt.encode(payload=token_info, key=jwt_key, algorithm="HS256")
         return {'msg': "Authorized",
                 'data': {'redirection': redirection+'?file_id='+request.args.get('file_id'),
                          'token': 'Bearer {}'.format(token)}}, 200
@@ -72,7 +72,9 @@ def signup():
         "index_page_authorization": True,
         "edit_page_authorization": False
     }
-    token = jwt.encode(payload=token_info, key=key, algorithm="HS256")
+    token = jwt.encode(payload=token_info, key=jwt_key, algorithm="HS256")
+
+    current_app.redis_conn.sadd('online_users', token)
 
     return {'msg': "Sign up successful",
             'data': {"account_id": user[0][0],
@@ -117,7 +119,9 @@ def login():
     if 'edit' in redirection:
         token_info['edit_page_authorization'] = True
 
-    token = jwt.encode(payload=token_info, key=key, algorithm="HS256")
+    token = jwt.encode(payload=token_info, key=jwt_key, algorithm="HS256")
+
+    current_app.redis_conn.sadd('online_users', token)
 
     return {'msg': "Login successful",
             'data': {'redirection': redirection,
@@ -160,3 +164,22 @@ def new_user_info():
         print(error)
         return {'msg': 'Unknown error. Check server terminal for more info.',
                 'data': None}, 500
+
+
+# Route for getting all logged in user info
+@blueprint.route('get_logged_in_users', methods=['POST'])
+def get_logged_in_users():
+    logged_in_users = current_app.redis_conn.smembers('online_users')
+    result = ''
+    for user in logged_in_users:
+        validation = jwt_validation(user.decode('utf-8'), '/account')
+        if validation['msg'] == 'Validation failed':
+            current_app.redis_conn.srem('online_users', user)
+        else:
+            payload = validation['data']['payload']
+            result += 'Account_id: {}; Login_time: {}; Expire: {}\n'.format(
+                payload['account_id'], datetime.fromtimestamp(
+                    payload['nbf']).strftime('%Y-%m-%d %H:%M:%S'),
+                datetime.fromtimestamp(payload['exp']).strftime('%Y-%m-%d %H:%M:%S'))
+    return {'msg': None,
+            'data': {'users': result}}, 200

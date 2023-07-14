@@ -6,3 +6,4 @@ Flasgger
 reportlab
 openpyxl
 pandas
+redis
