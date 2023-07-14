@@ -31,7 +31,8 @@ def create_app():
         if not (request.path.startswith('/js') or request.path.startswith('/css')
                 or request.path.startswith('/avatar') or request.path.startswith('/favicon.ico')):
             log_message = f"[{request.method}] {request.url}\n"
-            log_message += f"Authorization header: {request.headers.get('Authorization')}"
+            log_message += f"Authorization header: {request.headers.get('Authorization')}\n"
+            log_message += f"Cookie token: {request.cookies.get('token')}"
             if request.form:
                 log_message += f"\nForm Data: {request.form}"
 

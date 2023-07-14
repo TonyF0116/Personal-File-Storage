@@ -1,4 +1,4 @@
-from flask import Blueprint, request, url_for, current_app
+from flask import Blueprint, request, url_for, current_app, make_response
 from ..models.account import sign_up, check_username_num, check_password, update_user_info
 from ..config import jwt_key
 import jwt
@@ -16,12 +16,15 @@ blueprint = Blueprint('account', __name__, url_prefix='/api/account')
 @blueprint.route('', methods=['POST'])
 def account():
     # Retrieve the token and redirection from request header and url
-    # Return unauthorized if Authorization not in header
+    # Return unauthorized if Authorization not in header or cookies
     authorization = request.headers.get('Authorization')
     redirection = request.args.get('redirection')
     if authorization == None:
-        return {'msg': "Unauthorized",
-                'data': {'redirection': redirection}}, 401
+        if request.cookies.get('token') != None:
+            authorization = request.cookies.get('token')
+        else:
+            return {'msg': "Unauthorized",
+                    'data': {'redirection': redirection}}, 401
     token = authorization[7:]
 
     # Validate the token and authorization
@@ -30,7 +33,8 @@ def account():
     # If authorized, do the redirection
     if result['msg'] == 'Authorized':
         return {'msg': 'Authorized',
-                'data': {'redirection': redirection}}, 200
+                'data': {'redirection': redirection,
+                         'token': 'Bearer {}'.format(token)}}, 200
     # If unauthorized but validation succeeded, grant the permission and do the redirection
     if result['msg'] == 'Unauthorized':
         token_info = result['data']['payload']
@@ -40,9 +44,13 @@ def account():
             token_info['edit_page_authorization'] = True
 
         token = jwt.encode(payload=token_info, key=jwt_key, algorithm="HS256")
-        return {'msg': "Authorized",
-                'data': {'redirection': redirection+'?file_id='+request.args.get('file_id'),
-                         'token': 'Bearer {}'.format(token)}}, 200
+        # Store token in cookie
+        response = make_response({'msg': "Authorized",
+                                  'data': {'redirection': redirection+'?file_id='+request.args.get('file_id'),
+                                           'token': 'Bearer {}'.format(token)}})
+        response.set_cookie('token', 'Bearer {}'.format(token))
+
+        return response, 200
 
     return {'msg': "Unauthorized",
             'data': {'redirection': redirection}}, 401
@@ -76,9 +84,13 @@ def signup():
 
     current_app.redis_conn.sadd('online_users', token)
 
-    return {'msg': "Sign up successful",
-            'data': {"account_id": user[0][0],
-                     'token': 'Bearer {}'.format(token)}}, 200
+    # Store token in cookie
+    response = make_response({'msg': "Sign up successful",
+                              'data': {"account_id": user[0][0],
+                                       'token': 'Bearer {}'.format(token)}})
+    response.set_cookie('token', 'Bearer {}'.format(token))
+
+    return response, 200
 
 
 @blueprint.route('/login', methods=['POST'])
@@ -123,9 +135,13 @@ def login():
 
     current_app.redis_conn.sadd('online_users', token)
 
-    return {'msg': "Login successful",
-            'data': {'redirection': redirection,
-                     'token': 'Bearer {}'.format(token)}}, 200
+    # Store token in cookie
+    response = make_response({'msg': "Login successful",
+                              'data': {'redirection': redirection,
+                                       'token': 'Bearer {}'.format(token)}})
+    response.set_cookie('token', 'Bearer {}'.format(token))
+
+    return response, 200
 
 
 # Update user nickname and avatar suffix
