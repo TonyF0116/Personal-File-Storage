@@ -33,6 +33,7 @@
     <div v-if="administration == 1">
         <button @click="show_logged_in_users">Show logged in users</button>
     </div>
+    <button @click="logout">Logout</button>
 
     <ol>
         <li v-for="file in  files " :key="file"><a
@@ -79,13 +80,23 @@ export default {
         this.initialize_index_page();
     },
     methods: {
+        // Logout
+        logout() {
+            axios.post('/api/account/logout')
+                .then(response => {
+                    console.log(response);
+                    this.$router.push('/account');
+                }, error => {
+                    console.log(error);
+                })
+        },
         // Show logged in users
         show_logged_in_users() {
             axios.post('/api/account/get_logged_in_users')
                 .then(response => {
-                    alert(response.data.data.users)
+                    alert(response.data.data.users);
                 }, error => {
-                    console.log(error)
+                    console.log(error);
                 })
         },
         // Create new excel file

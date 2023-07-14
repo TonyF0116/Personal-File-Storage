@@ -199,3 +199,13 @@ def get_logged_in_users():
                 datetime.fromtimestamp(payload['exp']).strftime('%Y-%m-%d %H:%M:%S'))
     return {'msg': None,
             'data': {'users': result}}, 200
+
+
+# Routes for handling logout request
+@blueprint.route('logout', methods=['POST'])
+def logout():
+    response = make_response({'msg': 'Logout successful',
+                              'data': None})
+    # Clear token in cookie
+    response.set_cookie('token', '')
+    return response, 200
